@@ -9,10 +9,13 @@ import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,13 @@ public class AcProviderServiceImpl implements AcProviderService {
 
     @Autowired
     private AcDao dao;
+    @Autowired
+    private SecureRandom random;
+    
+    @PostConstruct
+    private void init(){
+        random=new SecureRandom();
+    }
 
     @Override
     public User createUser(String authToken, long expDate,
@@ -149,7 +159,19 @@ public class AcProviderServiceImpl implements AcProviderService {
         return attrs;
     }
     
+    @Override
     public Collection<Authority> getAuthorities(){
         return dao.readAuthorities();
+    }
+    
+    @Override
+    public Authority getAuthority(String name){
+        return dao.readAuthority(name);
+    }
+    
+    @Override
+    public String generateAuthToken(){
+        // TODO: check if already used
+        return new BigInteger(256,random).toString(16);
     }
 }

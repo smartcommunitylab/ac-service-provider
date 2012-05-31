@@ -31,4 +31,6 @@ public interface AcDao {
     public List<User> readUsers(List<Attribute> attributes);
 
     Collection<Authority> readAuthorities();
+
+    Authority readAuthority(String name);
 }

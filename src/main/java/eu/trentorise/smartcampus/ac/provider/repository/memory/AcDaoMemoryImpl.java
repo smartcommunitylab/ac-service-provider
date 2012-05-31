@@ -9,11 +9,7 @@ import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Repository;
@@ -40,9 +36,9 @@ public class AcDaoMemoryImpl implements AcDao {
             }
         }
         map.put(acObj.getId(), acObj);
-        if(acObj instanceof User){
-            User user=(User)acObj;
-            for(Attribute a:user.getAttributes()){
+        if (acObj instanceof User) {
+            User user = (User) acObj;
+            for (Attribute a : user.getAttributes()) {
                 create(a.getAuthority());
             }
         }
@@ -52,12 +48,13 @@ public class AcDaoMemoryImpl implements AcDao {
     public <T extends AcObject> void update(T acObj) {
         Map<Long, T> map = (Map<Long, T>) cache.get(acObj.getClass());
         if (map == null || map.get(acObj.getId()) == null) {
-            throw new IllegalArgumentException("The object can't be updated because it doesn't exist");
+            throw new IllegalArgumentException(
+                    "The object can't be updated because it doesn't exist");
         }
         map.put(acObj.getId(), acObj);
-        if(acObj instanceof User){
-            User user=(User)acObj;
-            for(Attribute a:user.getAttributes()){
+        if (acObj instanceof User) {
+            User user = (User) acObj;
+            for (Attribute a : user.getAttributes()) {
                 create(a.getAuthority());
             }
         }
@@ -124,8 +121,19 @@ public class AcDaoMemoryImpl implements AcDao {
         }
         return list;
     }
-    
-    public Collection<Authority> readAuthorities(){
+
+    @Override
+    public Collection<Authority> readAuthorities() {
         return (Collection<Authority>) cache.get(Authority.class).values();
+    }
+
+    @Override
+    public Authority readAuthority(String name) {
+        for (Authority auth : readAuthorities()) {
+            if (auth.getName().equals(name)) {
+                return auth;
+            }
+        }
+        return null;
     }
 }
