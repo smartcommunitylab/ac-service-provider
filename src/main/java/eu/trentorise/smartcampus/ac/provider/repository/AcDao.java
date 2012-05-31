@@ -8,6 +8,7 @@ import eu.trentorise.smartcampus.ac.provider.model.AcObject;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -28,4 +29,6 @@ public interface AcDao {
     public User readUser(String authToken);
 
     public List<User> readUsers(List<Attribute> attributes);
+
+    Collection<Authority> readAuthorities();
 }

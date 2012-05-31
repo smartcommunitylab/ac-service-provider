@@ -6,9 +6,11 @@ package eu.trentorise.smartcampus.ac.provider.repository.memory;
 
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
+import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,12 @@ public class AcDaoMemoryImpl implements AcDao {
             }
         }
         map.put(acObj.getId(), acObj);
+        if(acObj instanceof User){
+            User user=(User)acObj;
+            for(Attribute a:user.getAttributes()){
+                create(a.getAuthority());
+            }
+        }
     }
 
     @Override
@@ -47,6 +55,12 @@ public class AcDaoMemoryImpl implements AcDao {
             throw new IllegalArgumentException("The object can't be updated because it doesn't exist");
         }
         map.put(acObj.getId(), acObj);
+        if(acObj instanceof User){
+            User user=(User)acObj;
+            for(Attribute a:user.getAttributes()){
+                create(a.getAuthority());
+            }
+        }
     }
 
     @Override
@@ -109,5 +123,9 @@ public class AcDaoMemoryImpl implements AcDao {
             }
         }
         return list;
+    }
+    
+    public Collection<Authority> readAuthorities(){
+        return (Collection<Authority>) cache.get(Authority.class).values();
     }
 }
