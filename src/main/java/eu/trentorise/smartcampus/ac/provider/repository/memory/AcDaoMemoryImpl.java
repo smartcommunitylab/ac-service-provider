@@ -124,13 +124,25 @@ public class AcDaoMemoryImpl implements AcDao {
 
     @Override
     public Collection<Authority> readAuthorities() {
-        return (Collection<Authority>) cache.get(Authority.class).values();
+        if (cache.get(Authority.class) != null) {
+            return (Collection<Authority>) cache.get(Authority.class).values();
+        }
+        return Collections.emptyList();
     }
 
     @Override
-    public Authority readAuthority(String name) {
+    public Authority readAuthorityByName(String name) {
         for (Authority auth : readAuthorities()) {
             if (auth.getName().equals(name)) {
+                return auth;
+            }
+        }
+        return null;
+    }
+    
+    public Authority readAuthorityByUrl(String url) {
+        for (Authority auth : readAuthorities()) {
+            if (auth.getRedirectUrl().equals(url)) {
                 return auth;
             }
         }

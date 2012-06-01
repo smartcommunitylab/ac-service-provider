@@ -32,5 +32,7 @@ public interface AcDao {
 
     Collection<Authority> readAuthorities();
 
-    Authority readAuthority(String name);
+    Authority readAuthorityByName(String name);
+
+    Authority readAuthorityByUrl(String url);
 }

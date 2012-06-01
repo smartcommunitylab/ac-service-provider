@@ -31,7 +31,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 
     @Autowired
     private AcDao dao;
-    @Autowired
+    
     private SecureRandom random;
     
     @PostConstruct
@@ -165,8 +165,18 @@ public class AcProviderServiceImpl implements AcProviderService {
     }
     
     @Override
-    public Authority getAuthority(String name){
-        return dao.readAuthority(name);
+    public Authority getAuthorityByName(String name){
+        return dao.readAuthorityByName(name);
+    }
+    
+    @Override
+    public Authority getAuthorityByUrl(String name){
+        return dao.readAuthorityByUrl(name);
+    }
+    
+    @Override
+    public void createAuthority(Authority auth){
+        dao.create(auth);
     }
     
     @Override
