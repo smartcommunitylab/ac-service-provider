@@ -5,6 +5,7 @@
 package eu.trentorise.smartcampus.ac.provider.services;
 
 import eu.trentorise.smartcampus.ac.provider.AcProviderService;
+import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -41,7 +42,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 
     @Override
     public User createUser(String authToken, long expDate,
-            List<Attribute> attributes) {
+            List<Attribute> attributes) throws AcServiceException {
         User user = new User();
         user.setAuthToken(authToken);
         user.setExpTime(expDate);
@@ -51,7 +52,7 @@ public class AcProviderServiceImpl implements AcProviderService {
     }
 
     @Override
-    public boolean removeUser(String authToken) {
+    public boolean removeUser(String authToken) throws AcServiceException{
         User user = dao.readUser(authToken);
         if (user != null) {
             return dao.delete(user);
@@ -60,13 +61,13 @@ public class AcProviderServiceImpl implements AcProviderService {
     }
 
     @Override
-    public User getUserByToken(String authToken) {
+    public User getUserByToken(String authToken) throws AcServiceException{
         return dao.readUser(authToken);
     }
 
     @Override
     public List<User> getUsersByAttributes(
-            List<Attribute> attributes) {
+            List<Attribute> attributes) throws AcServiceException {
         return dao.readUsers(attributes);
     }
 
@@ -89,7 +90,7 @@ public class AcProviderServiceImpl implements AcProviderService {
      */
     @Override
     public void updateUser(long userId, String authToken, Long expTime,
-            List<Attribute> attributes) {
+            List<Attribute> attributes) throws AcServiceException {
         User user = dao.readUser(userId);
         if (user == null) {
             throw new IllegalArgumentException(
@@ -123,7 +124,7 @@ public class AcProviderServiceImpl implements AcProviderService {
     }
 
     @Override
-    public boolean isValidUser(String authToken) {
+    public boolean isValidUser(String authToken) throws AcServiceException {
         long time = System.currentTimeMillis();
         User user = dao.readUser(authToken);
         return user != null && ((user.getExpDate() - time) > 0);
@@ -142,7 +143,7 @@ public class AcProviderServiceImpl implements AcProviderService {
      */
     @Override
     public List<Attribute> getUserAttributes(String authToken, String authority,
-            String key) {
+            String key) throws AcServiceException {
         User user = getUserByToken(authToken);
         List<Attribute> attrs = new ArrayList<Attribute>();
         if (authority != null) {
@@ -160,27 +161,27 @@ public class AcProviderServiceImpl implements AcProviderService {
     }
     
     @Override
-    public Collection<Authority> getAuthorities(){
+    public Collection<Authority> getAuthorities() throws AcServiceException{
         return dao.readAuthorities();
     }
     
     @Override
-    public Authority getAuthorityByName(String name){
+    public Authority getAuthorityByName(String name) throws AcServiceException{
         return dao.readAuthorityByName(name);
     }
     
     @Override
-    public Authority getAuthorityByUrl(String name){
+    public Authority getAuthorityByUrl(String name) throws AcServiceException{
         return dao.readAuthorityByUrl(name);
     }
     
     @Override
-    public void createAuthority(Authority auth){
+    public void createAuthority(Authority auth) throws AcServiceException{
         dao.create(auth);
     }
     
     @Override
-    public String generateAuthToken(){
+    public String generateAuthToken() throws AcServiceException{
         // TODO: check if already used
         return new BigInteger(256,random).toString(16);
     }
