@@ -23,7 +23,7 @@
 		address="${service.soap.endpointAddress}" />
 
 	<!-- Default values used if there is no property file or value -->
-	<osgix:cm-properties id="preProps" persistent-id="acproviderservice.properties">
+	<osgix:cm-properties id="preProps" persistent-id="acserviceprovider.properties">
 		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
 	</osgix:cm-properties>
 
