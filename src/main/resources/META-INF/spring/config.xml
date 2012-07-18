@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 	http://www.springframework.org/schema/context
@@ -13,20 +17,56 @@
 	http://camel.apache.org/schema/spring
 	http://camel.apache.org/schema/spring/camel-spring.xsd
 	http://www.springframework.org/schema/osgi-compendium
-	http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+	http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-        <context:component-scan base-package="eu.trentorise.smartcampus.ac.provider"/>
+	<context:component-scan base-package="eu.trentorise.smartcampus.ac.provider" />
+	
+	<bean id="dao" class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
+	
 
-	<bean id="endpointImplementor" class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl"/>
+	<bean id="endpointImplementor"
+		class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl" />
 
-	<jaxws:endpoint id="acProviderServiceEndpoint" implementor="#endpointImplementor"
-		address="${service.soap.endpointAddress}" />
+	<jaxws:endpoint id="acProviderServiceEndpoint"
+		implementor="#endpointImplementor" address="${service.soap.endpointAddress}" />
 
 	<!-- Default values used if there is no property file or value -->
-	<osgix:cm-properties id="preProps" persistent-id="acserviceprovider.properties">
+	<osgix:cm-properties id="preProps"
+		persistent-id="acserviceprovider.properties">
 		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
 	</osgix:cm-properties>
 
-	<context:property-placeholder properties-ref="preProps" />
+	<context:property-placeholder
+		properties-ref="preProps" />
 
+	<!-- PERSISTENCE CONFIGURATION -->
+
+<!-- Data Source -->
+ <osgi:reference id="datasource" interface="javax.sql.DataSource" filter="(osgi.jndi.service.name=smartDS)"/>
+	
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="datasource" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<!-- uncomment to update db schema -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="datasource" />
+	</bean>
+	<bean id="persistenceAnnotation"
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
 </beans>
