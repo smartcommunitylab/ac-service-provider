@@ -19,7 +19,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 
 public interface AcDao {
 
-	public <T extends AcObject> void create(T acObj);
+	public <T extends AcObject> long create(T acObj);
 
 	public <T extends AcObject> void update(T acObj);
 
@@ -38,4 +38,5 @@ public interface AcDao {
 	Authority readAuthorityByName(String name);
 
 	Authority readAuthorityByUrl(String url);
+
 }

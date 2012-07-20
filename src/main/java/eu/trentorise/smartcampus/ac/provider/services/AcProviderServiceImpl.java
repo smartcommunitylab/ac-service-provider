@@ -35,6 +35,9 @@ public class AcProviderServiceImpl implements AcProviderService {
 	@Autowired
 	private AcDao dao;
 
+	@Autowired
+	private CreationWrapper creationWrapper;
+
 	private SecureRandom random;
 
 	@PostConstruct
@@ -49,7 +52,11 @@ public class AcProviderServiceImpl implements AcProviderService {
 		user.setAuthToken(authToken);
 		user.setExpTime(expDate);
 		user.setAttributes(attributes);
-		dao.create(user);
+		try {
+			creationWrapper.create(user);
+		} catch (Exception e) {
+			throw new AcServiceException(e);
+		}
 		return user;
 	}
 

@@ -24,7 +24,7 @@ import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.Us
 public class AcDaoPersistenceImplTest extends TestCase
 
 {
-	private static final String PERSISTENCE_UNIT_NAME = "persistence-unit-mysql";
+	private static final String PERSISTENCE_UNIT_NAME = "persistence-unit";
 
 	private static final String AUTH_NAME_PRESENT = "auth1";
 	private static final String AUTH_NAME_NOT_PRESENT = "dummy_auth";

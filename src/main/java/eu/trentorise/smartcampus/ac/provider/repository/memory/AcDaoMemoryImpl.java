@@ -32,7 +32,7 @@ public class AcDaoMemoryImpl implements AcDao {
 	final Map<Class<?>, Map<Long, ? extends AcObject>> cache = new ConcurrentHashMap<Class<?>, Map<Long, ? extends AcObject>>();
 
 	@Override
-	public <T extends AcObject> void create(T acObj) {
+	public <T extends AcObject> long create(T acObj) {
 		acObj.setId(getNextId(acObj.getClass()));
 		Map<Long, T> map;
 		synchronized (cache) {
@@ -49,6 +49,7 @@ public class AcDaoMemoryImpl implements AcDao {
 				create(a.getAuthority());
 			}
 		}
+		return acObj.getId();
 	}
 
 	@Override
@@ -160,4 +161,5 @@ public class AcDaoMemoryImpl implements AcDao {
 	public User readUserBySocialId(long id) {
 		throw new IllegalArgumentException("Method not implemented");
 	}
+
 }

@@ -3,8 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:jaxws="http://cxf.apache.org/jaxws"
-	xmlns:osgi="http://www.springframework.org/schema/osgi"
-	xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+	xmlns:osgi="http://www.springframework.org/schema/osgi" xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
 	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
@@ -23,9 +22,12 @@
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
 	<context:component-scan base-package="eu.trentorise.smartcampus.ac.provider" />
-	
-	<bean id="dao" class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
-	
+
+
+	<bean id="dao"
+		class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
+
+
 
 	<bean id="endpointImplementor"
 		class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl" />
@@ -37,6 +39,9 @@
 	<osgix:cm-properties id="preProps"
 		persistent-id="acserviceprovider.properties">
 		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
+		<!-- social engine client connection info -->
+		<prop key="socialEngine.host">213.21.154.85</prop>
+		<prop key="socialEngine.port">8080</prop>
 	</osgix:cm-properties>
 
 	<context:property-placeholder
@@ -44,9 +49,10 @@
 
 	<!-- PERSISTENCE CONFIGURATION -->
 
-<!-- Data Source -->
- <osgi:reference id="datasource" interface="javax.sql.DataSource" filter="(osgi.jndi.service.name=smartDS)"/>
-	
+	<!-- Data Source -->
+	<osgi:reference id="datasource" interface="javax.sql.DataSource"
+		filter="(osgi.jndi.service.name=smartDS)" />
+
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="datasource" />

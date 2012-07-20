@@ -12,8 +12,11 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
@@ -24,11 +27,15 @@ import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.Au
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
 
 @Transactional
+@Repository("acPersistenceDao")
 public class AcDaoPersistenceImpl implements AcDao {
 
 	EntityManagerFactory emf;
 	@PersistenceContext
 	EntityManager em;
+
+	@Autowired
+	SocialEngineManager socialEngineManager;
 
 	public AcDaoPersistenceImpl(String pu) {
 		emf = Persistence.createEntityManagerFactory(pu);
@@ -41,15 +48,17 @@ public class AcDaoPersistenceImpl implements AcDao {
 	}
 
 	@Override
-	public <T extends AcObject> void create(T acObj) {
+	public <T extends AcObject> long create(T acObj) {
 
+		long id = 0;
 		if (acObj != null) {
 			if (acObj instanceof User) {
 				if (readUser(((User) acObj).getAuthToken()) != null) {
 					throw new IllegalArgumentException(
 							"This authToken is already present");
 				}
-				if (readUserBySocialId(((User) acObj).getSocialId()) != null) {
+				if (((User) acObj).getSocialId() != 0
+						&& readUserBySocialId(((User) acObj).getSocialId()) != null) {
 					throw new IllegalArgumentException(
 							"This socialId is already present");
 				}
@@ -63,6 +72,7 @@ public class AcDaoPersistenceImpl implements AcDao {
 					throw e;
 				}
 				em.persist(toSave);
+				id = toSave.getId();
 			} else if (acObj instanceof Authority) {
 				if (readAuthorityByName(((Authority) acObj).getName()) != null) {
 					throw new IllegalArgumentException(
@@ -72,11 +82,14 @@ public class AcDaoPersistenceImpl implements AcDao {
 					throw new IllegalArgumentException(
 							"This redirectUrl is already present");
 				}
-
-				em.persist(PersistenceConverter.fromAuthority(
-						(Authority) acObj, true));
+				AuthorityEntity toSave = PersistenceConverter.fromAuthority(
+						(Authority) acObj, true);
+				em.persist(toSave);
+				id = toSave.getId();
 			}
 		}
+
+		return id;
 	}
 
 	@Override
@@ -92,17 +105,19 @@ public class AcDaoPersistenceImpl implements AcDao {
 					User userPresent = readUser(u.getAuthToken());
 					User userSocialIdPresent = readUserBySocialId(u
 							.getSocialId());
-					if (userPresent != null && userPresent.getId() != u.getId()) {
+					if (userPresent != null
+							&& !userPresent.getId().equals(u.getId())) {
 						throw new IllegalArgumentException(
 								"The object can't be updated because authToken is already present");
 					}
 					if (userSocialIdPresent != null
-							&& userSocialIdPresent.getId() != u.getId()) {
+							&& !userSocialIdPresent.getId().equals(u.getId())) {
 						throw new IllegalArgumentException(
 								"The object can't be updated because socialId is already present");
 					}
 					ue.setAuthToken(u.getAuthToken());
 					ue.setExpTime(u.getExpDate());
+					ue.setSocialId(u.getSocialId());
 					try {
 						ue = updateAttributes(ue, u);
 					} catch (IllegalArgumentException e) {
@@ -125,12 +140,12 @@ public class AcDaoPersistenceImpl implements AcDao {
 							.getRedirectUrl());
 
 					if (authNamePresent != null
-							&& authNamePresent.getId() != a.getId()) {
+							&& !authNamePresent.getId().equals(a.getId())) {
 						throw new IllegalArgumentException(
 								"The object can't be updated because name is already present");
 					}
 					if (authUrlPresent != null
-							&& authUrlPresent.getId() != a.getId()) {
+							&& !authUrlPresent.getId().equals(a.getId())) {
 						throw new IllegalArgumentException(
 								"The object can't be updated because redirectUrl is already present");
 					}

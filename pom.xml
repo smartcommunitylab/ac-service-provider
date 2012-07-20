@@ -8,6 +8,16 @@
 	<packaging>bundle</packaging>
 	<repositories>
 		<repository>
+			<id>smartcampus</id>
+			<url>http://nexus.sc.trentorise.eu/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>sc-releases</id>
 			<name>Smartcampus releases repo</name>
 			<url>http://213.21.154.86/nexus/content/repositories/releases/</url>
@@ -56,40 +66,40 @@
 						<Embed-Transitive>true</Embed-Transitive>
 						<Include-Resource>{maven-resources}</Include-Resource>
 						<Import-Package>
-						org.springframework.jdbc,
-						org.springframework.jdbc.datasource,
-						javax.persistence,
-						javax.annotation, 
-						javax.jws, 
-						javax.management, 
-						javax.naming, 
-						javax.naming.spi, 
-						javax.net, 
-						javax.net.ssl, 
-						javax.sql, 
-						javax.transaction.xa, 
-						javax.xml.parsers, 
-						javax.xml.stream, 
-						javax.xml.transform, 
-						javax.xml.transform.dom, 
-						javax.xml.transform.sax, 
-						javax.xml.transform.stax, 
-						javax.xml.transform.stream, 
-						org.springframework.orm.jpa, 
-						org.springframework.orm.jpa.support, 
-						org.springframework.stereotype, 
-						org.springframework.transaction.annotation, 
-						org.w3c.dom, 
-						org.xml.sax, 
-						org.xml.sax.helpers,
-						org.springframework.aop,
-						org.springframework.aop.framework,
-						org.aopalliance.aop,
-						org.springframework.beans.factory.annotation,
-						org.hibernate.ejb,
-						org.hibernate,
-						javax.persistence.spi,
-						!*
+							org.springframework.jdbc,
+							org.springframework.jdbc.datasource,
+							javax.persistence,
+							javax.annotation,
+							javax.jws,
+							javax.management,
+							javax.naming,
+							javax.naming.spi,
+							javax.net,
+							javax.net.ssl,
+							javax.sql,
+							javax.transaction.xa,
+							javax.xml.parsers,
+							javax.xml.stream,
+							javax.xml.transform,
+							javax.xml.transform.dom,
+							javax.xml.transform.sax,
+							javax.xml.transform.stax,
+							javax.xml.transform.stream,
+							org.springframework.orm.jpa,
+							org.springframework.orm.jpa.support,
+							org.springframework.stereotype,
+							org.springframework.transaction.annotation,
+							org.w3c.dom,
+							org.xml.sax,
+							org.xml.sax.helpers,
+							org.springframework.aop,
+							org.springframework.aop.framework,
+							org.aopalliance.aop,
+							org.springframework.beans.factory.annotation,
+							org.hibernate.ejb,
+							org.hibernate,
+							javax.persistence.spi,
+							!*
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -171,5 +181,31 @@
 			<version>3.0.6.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Social Engine client -->
+		<dependency>
+			<groupId>it.unitn.disi.sweb</groupId>
+			<artifactId>smartcampus-webapi-client</artifactId>
+			<version> 2.6.0-FINAL</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-beans</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-context</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xercesImpl</artifactId>
+					<groupId>xerces</groupId>
+				</exclusion>
+			</exclusions> 
+		</dependency>
+
 	</dependencies>
 </project>
