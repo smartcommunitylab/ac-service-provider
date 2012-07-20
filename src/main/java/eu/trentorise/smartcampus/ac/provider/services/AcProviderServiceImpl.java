@@ -207,4 +207,29 @@ public class AcProviderServiceImpl implements AcProviderService {
 	public void updateAuthority(Authority auth) throws AcServiceException {
 		dao.update(auth);
 	}
+
+	@Override
+	public void setAttribute(long userId, Attribute attribute)
+			throws AcServiceException {
+		if (attribute == null) {
+			throw new IllegalArgumentException("Attribute is not specified");
+
+		}
+
+		User user = dao.readUser(userId);
+		if (user == null) {
+			throw new IllegalArgumentException(
+					"The user with that ID doesn't exist");
+		}
+
+		int indexAttribute = user.getAttributes().indexOf(attribute);
+
+		if (indexAttribute == -1) {
+			user.getAttributes().add(attribute);
+		} else {
+			user.getAttributes().get(indexAttribute)
+					.setValue(attribute.getValue());
+		}
+		dao.update(user);
+	}
 }
