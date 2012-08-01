@@ -33,7 +33,7 @@ public class SocialEngineManager {
 		Long entityId = null;
 		try {
 			eb = new EntityBase();
-			eb.setLabel(userId);
+			eb.setLabel("SC_USER_" + System.currentTimeMillis());
 			entityBaseId = client.create(eb);
 			// Re-read to get the ID of the default KB
 			eb = client.readEntityBase(entityBaseId);
