@@ -115,6 +115,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 						"The expiration time is not specified");
 			}
 			user.setAuthToken(authToken);
+		}
+		if (expTime != null) {
 			user.setExpTime(expTime);
 		}
 		List<Attribute> tmp = new LinkedList<Attribute>();
