@@ -116,7 +116,7 @@ public class AcDaoPersistenceImpl implements AcDao {
 								"The object can't be updated because socialId is already present");
 					}
 					ue.setAuthToken(u.getAuthToken());
-					ue.setExpTime(u.getExpDate());
+					ue.setExpTime(u.getExpTime());
 					ue.setSocialId(u.getSocialId());
 					try {
 						ue = updateAttributes(ue, u);

@@ -142,7 +142,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	public boolean isValidUser(String authToken) throws AcServiceException {
 		long time = System.currentTimeMillis();
 		User user = dao.readUser(authToken);
-		return user != null && ((user.getExpDate() - time) > 0);
+		return user != null && ((user.getExpTime() - time) > 0);
 	}
 
 	/**

@@ -20,7 +20,7 @@ public class PersistenceConverter {
 				userEntity.setId(u.getId());
 			}
 			userEntity.setAuthToken(u.getAuthToken());
-			userEntity.setExpTime(u.getExpDate());
+			userEntity.setExpTime(u.getExpTime());
 			userEntity.setSocialId(u.getSocialId());
 			userEntity.setAttributeEntities(new HashSet<AttributeEntity>(
 					fromAttribute(u.getAttributes(), create)));
