@@ -4,12 +4,12 @@
  */
 package eu.trentorise.smartcampus.ac.provider.services;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.jws.WebService;
@@ -201,8 +201,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 
 	@Override
 	public String generateAuthToken() throws AcServiceException {
-		// TODO: check if already used
-		return new BigInteger(256, random).toString(16);
+		return UUID.randomUUID().toString();
 	}
 
 	@Override
