@@ -7,7 +7,6 @@ package eu.trentorise.smartcampus.ac.provider.services;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -119,22 +118,24 @@ public class AcProviderServiceImpl implements AcProviderService {
 		if (expTime != null) {
 			user.setExpTime(expTime);
 		}
-		List<Attribute> tmp = new LinkedList<Attribute>();
-		for (Attribute oldA : user.getAttributes()) {
-			Attribute remove = null;
-			for (Attribute newA : tmp) {
-				if (oldA.getAuthority().equals(newA.getAuthority())
-						&& oldA.getKey().equals(newA.getKey())) {
-					oldA.setValue(newA.getValue());
-					remove = newA;
+
+		List<Attribute> temp = new ArrayList<Attribute>();
+		for (Attribute newAttr : attributes) {
+			boolean founded = false;
+			for (Attribute presentAttr : user.getAttributes()) {
+				if (presentAttr.getAuthority().equals(newAttr.getAuthority())
+						&& presentAttr.getKey().equals(newAttr.getKey())) {
+					presentAttr.setValue(newAttr.getValue());
+					founded = true;
 					break;
 				}
 			}
-			if (remove != null) {
-				tmp.remove(remove);
+			if (!founded) {
+				temp.add(newAttr);
 			}
 		}
-		user.getAttributes().addAll(tmp);
+
+		user.getAttributes().addAll(temp);
 		dao.update(user);
 	}
 
