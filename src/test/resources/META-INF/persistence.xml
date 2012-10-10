@@ -10,44 +10,46 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 
 		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity</class>
-		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity</class> 
+		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity</class>
 		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity</class>
-		
+
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
-			<property name="javax.persistence.jdbc.url" value="jdbc:derby:C:/Temp/TestProviderServiceDB;create=true" />
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:derby:/tmp/TestProviderServiceDB;create=true" />
 			<property name="javax.persistence.jdbc.user" value="" />
 			<property name="javax.persistence.jdbc.password" value="" />
 
-			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyDialect" />
-			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
-		
-			<property name="hibernate.showSql" value="true" />
-		</properties>
-	</persistence-unit>
-	
-	<persistence-unit name="persistence-unit-mysql"
-		transaction-type="RESOURCE_LOCAL">
-
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-
-		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity</class>
-		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity</class> 
-		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity</class>
-		
-		
-		<properties>
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/TestProviderServiceDB" />
-			<property name="javax.persistence.jdbc.user" value="acsp" />
-			<property name="javax.persistence.jdbc.password" value="acsp" />
-
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="create" />
-		
+
 			<property name="hibernate.showSql" value="true" />
 		</properties>
 	</persistence-unit>
-	
-	
+
+<!-- 	<persistence-unit name="persistence-unit-mysql" -->
+<!-- 		transaction-type="RESOURCE_LOCAL"> -->
+
+<!-- 		<provider>org.hibernate.ejb.HibernatePersistence</provider> -->
+
+<!-- 		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity</class> -->
+<!-- 		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity</class> -->
+<!-- 		<class>eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity</class> -->
+
+
+<!-- 		<properties> -->
+<!-- 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" /> -->
+<!-- 			<property name="javax.persistence.jdbc.url" -->
+<!-- 				value="jdbc:mysql://localhost:3306/TestProviderServiceDB" /> -->
+<!-- 			<property name="javax.persistence.jdbc.user" value="acsp" /> -->
+<!-- 			<property name="javax.persistence.jdbc.password" value="acsp" /> -->
+
+<!-- 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" /> -->
+<!-- 			<property name="hibernate.hbm2ddl.auto" value="create" /> -->
+
+<!-- 			<property name="hibernate.showSql" value="true" /> -->
+<!-- 		</properties> -->
+<!-- 	</persistence-unit> -->
+
+
 </persistence>

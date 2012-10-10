@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+
+	<!-- Spring configuration for persistence unit test, there aren't both osgi 
+		and cxf-jaxws for some problem during test loading -->
+
+	<context:component-scan base-package="eu.trentorise.smartcampus.ac.provider" />
+
+
+	<bean id="dao"
+		class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
+
+	<bean id="endpointImplementor"
+		class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl" />
+
+	<context:property-placeholder location="classpath:acserviceprovider.properties" />
+
+	<!-- PERSISTENCE CONFIGURATION -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDriver" />
+		<property name="url"
+			value="jdbc:derby:/tmp/TestProviderServiceDB;create=true" />
+		<property name="username" value="" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="jpaProperties">
+			<props>
+<!-- 				<prop key="hibernate.dialect">"org.hibernate.dialect.DerbyTenSevenDialect"</prop> -->
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<bean id="persistenceAnnotation"
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>

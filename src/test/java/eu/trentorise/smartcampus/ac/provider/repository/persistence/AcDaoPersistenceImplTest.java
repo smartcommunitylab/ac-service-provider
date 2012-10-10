@@ -1,15 +1,22 @@
 package eu.trentorise.smartcampus.ac.provider.repository.persistence;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import junit.framework.Assert;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -21,7 +28,7 @@ import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.Us
  * Unit test for simple App.
  */
 
-public class AcDaoPersistenceImplTest extends TestCase
+public class AcDaoPersistenceImplTest
 
 {
 	private static final String PERSISTENCE_UNIT_NAME = "persistence-unit";
@@ -35,57 +42,52 @@ public class AcDaoPersistenceImplTest extends TestCase
 	private static final String TOKEN_PRESENT = "token_1";
 	private static final String TOKEN_NOT_PRESENT = "dummy_token";
 
-	private AcDao dao;
-	EntityManagerFactory emf;
-	EntityManager em;
+	private static AcDao dao;
+	private static EntityManagerFactory emf;
+	private static EntityManager em;
 
-	/**
-	 * Create the test case
-	 * 
-	 * @param testName
-	 *            name of the test case
-	 */
-	public AcDaoPersistenceImplTest(String testName) {
-		super(testName);
-		dao = new AcDaoPersistenceImpl(PERSISTENCE_UNIT_NAME);
+	@BeforeClass
+	public static void setup() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"spring/config.xml");
+		dao = ctx.getBean("acPersistenceDao", AcDao.class);
+	}
 
+	@Before
+	public void setupEnvironment() {
 		loadData();
-
 	}
 
-	/**
-	 * @return the suite of tests being tested
-	 */
-	public static Test suite() {
-		return new TestSuite(AcDaoPersistenceImplTest.class);
+	@After
+	public void cleanEnvironment() {
+		cleanDb();
 	}
 
-	public void testSearchUserByToken() {
-
+	@Test
+	public void searchUserByToken() {
 		User u = dao.readUser(TOKEN_PRESENT);
-
-		assertNotNull(u);
-
+		Assert.assertNotNull(u);
 		u = dao.readUser(TOKEN_NOT_PRESENT);
-		assertNull(u);
+		Assert.assertNull(u);
 	}
 
-	public void testSearchUserById() {
+	@Test
+	public void searchUserById() {
 		User u = dao.readUser(2);
-
-		assertNotNull(u);
-
+		Assert.assertNotNull(u);
 		u = dao.readUser(1000);
-		assertNull(u);
+		Assert.assertNull(u);
 	}
 
-	public void testSearchUserBySocialId() {
-		assertTrue(dao.readUserBySocialId((long) 1001) != null);
-		assertTrue(dao.readUserBySocialId((long) 1) == null);
+	@Test
+	public void searchUserBySocialId() {
+		Assert.assertTrue(dao.readUserBySocialId((long) 1001) != null);
+		Assert.assertTrue(dao.readUserBySocialId((long) 1) == null);
 	}
 
-	public void testSearchUserByAttr() {
-		assertTrue(!dao.readUsers(loadAttributes()).isEmpty());
+	@Test
+	public void searchUserByAttr() {
+		Assert.assertTrue(!dao.readUsers(loadAttributes()).isEmpty());
 
 		List<Attribute> attrs = new ArrayList<Attribute>();
 
@@ -98,23 +100,26 @@ public class AcDaoPersistenceImplTest extends TestCase
 		a.setAuthority(auth);
 		attrs.add(a);
 
-		assertTrue(dao.readUsers(attrs).isEmpty());
+		Assert.assertTrue(dao.readUsers(attrs).isEmpty());
 
 	}
 
-	public void testSearchAuthorities() {
-		assertTrue(dao.readAuthorities().size() > 0);
+	@Test
+	public void searchAuthorities() {
+		Assert.assertTrue(dao.readAuthorities().size() > 0);
 	}
 
-	public void testSearchAuthorityByName() {
-		assertNotNull(dao.readAuthorityByName(AUTH_NAME_PRESENT));
-		assertNull(dao.readAuthorityByName(AUTH_NAME_NOT_PRESENT));
+	@Test
+	public void searchAuthorityByName() {
+		Assert.assertNotNull(dao.readAuthorityByName(AUTH_NAME_PRESENT));
+		Assert.assertNull(dao.readAuthorityByName(AUTH_NAME_NOT_PRESENT));
 
 	}
 
-	public void testSearchAuthorityByUrl() {
-		assertNotNull(dao.readAuthorityByUrl(AUTH_URL_PRESENT));
-		assertNull(dao.readAuthorityByUrl(AUTH_URL_NOT_PRESENT));
+	@Test
+	public void searchAuthorityByUrl() {
+		Assert.assertNotNull(dao.readAuthorityByUrl(AUTH_URL_PRESENT));
+		Assert.assertNull(dao.readAuthorityByUrl(AUTH_URL_NOT_PRESENT));
 	}
 
 	public void testCreateUser() {
@@ -140,9 +145,9 @@ public class AcDaoPersistenceImplTest extends TestCase
 		attrs.add(attr);
 		user.setAttributes(attrs);
 
-		assertNull(dao.readUser("token_test"));
+		Assert.assertNull(dao.readUser("token_test"));
 		dao.create(user);
-		assertNotNull(dao.readUser("token_test"));
+		Assert.assertNotNull(dao.readUser("token_test"));
 
 		user = new User();
 		user.setAuthToken("token_test1");
@@ -151,7 +156,7 @@ public class AcDaoPersistenceImplTest extends TestCase
 
 		try {
 			dao.create(user);
-			fail("Eception not throw");
+			Assert.fail("Eception not throw");
 		} catch (IllegalArgumentException e) {
 
 		}
@@ -163,52 +168,54 @@ public class AcDaoPersistenceImplTest extends TestCase
 		auth.setName("new_auth");
 		auth.setRedirectUrl("new_url");
 
-		assertNull(dao.readAuthorityByName("new_auth"));
+		Assert.assertNull(dao.readAuthorityByName("new_auth"));
 		dao.create(auth);
-		assertNotNull(dao.readAuthorityByName("new_auth"));
+		Assert.assertNotNull(dao.readAuthorityByName("new_auth"));
 
 		auth = new Authority();
 		auth.setName("new_auth1");
 		auth.setRedirectUrl(AUTH_URL_PRESENT);
 		try {
 			dao.create(auth);
-			fail("Exception not throw");
+			Assert.fail("Exception not throw");
 		} catch (IllegalArgumentException e) {
 		}
 
-		assertNull(dao.readAuthorityByName("new_auth1"));
+		Assert.assertNull(dao.readAuthorityByName("new_auth1"));
 
 		auth = new Authority();
 		auth.setName(AUTH_NAME_PRESENT);
 		auth.setRedirectUrl(AUTH_URL_NOT_PRESENT);
 		try {
 			dao.create(auth);
-			fail("Exception not throw");
+			Assert.fail("Exception not throw");
 		} catch (IllegalArgumentException e) {
 		}
 
-		assertNull(dao.readAuthorityByName(AUTH_URL_NOT_PRESENT));
+		Assert.assertNull(dao.readAuthorityByName(AUTH_URL_NOT_PRESENT));
 
 	}
 
-	public void testUpdateAuthority() {
+	@Test
+	public void updateAuthority() {
 		Authority auth = new Authority();
 		auth.setName("auth1");
 		auth.setRedirectUrl("www.smartcampus.eu");
 		auth.setId((long) 1);
-		assertTrue(dao.readAuthorityByUrl("url_auth1") != null
+		Assert.assertTrue(dao.readAuthorityByUrl("url_auth1") != null
 				&& dao.readAuthorityByUrl("www.smartcampus.eu") == null);
 		dao.update(auth);
-		assertTrue(dao.readAuthorityByUrl("www.smartcampus.eu") != null
+		Assert.assertTrue(dao.readAuthorityByUrl("www.smartcampus.eu") != null
 				&& dao.readAuthorityByUrl("url_auth1") == null);
 	}
 
-	public void testUpdateUserAttribute() {
+	@Test
+	public void updateUserAttribute() {
 		User u = dao.readUser("token_3");
 
 		// check on attribute update
 		List<Attribute> list = u.getAttributes();
-		assertTrue(dao.readUsers(list).size() > 0);
+		Assert.assertTrue(dao.readUsers(list).size() > 0);
 
 		List<Attribute> cloneList = new ArrayList<Attribute>(list);
 
@@ -226,16 +233,17 @@ public class AcDaoPersistenceImplTest extends TestCase
 
 		cloneList.get(0).setValue("SMARTCAMPUS");
 
-		assertTrue(dao.readUsers(cloneList).size() == 0);
+		Assert.assertTrue(dao.readUsers(cloneList).size() == 0);
 
 		u.setAttributes(cloneList);
 		dao.update(u);
 
-		assertTrue(dao.readUsers(cloneList).size() > 0);
+		Assert.assertTrue(dao.readUsers(cloneList).size() > 0);
 
 	}
 
-	public void testUpdateUserAttributeNoAuth() {
+	@Test
+	public void updateUserAttributeNoAuth() {
 		User u = dao.readUser("token_3");
 
 		List<Attribute> list = u.getAttributes();
@@ -253,90 +261,67 @@ public class AcDaoPersistenceImplTest extends TestCase
 
 		cloneList.add(newA);
 
-		assertTrue(dao.readUsers(list).size() > 0);
-		assertTrue(dao.readUsers(cloneList).size() == 0);
-		assertTrue(dao.readAuthorityByName("newAuthority") == null);
+		Assert.assertTrue(dao.readUsers(list).size() > 0);
+		Assert.assertTrue(dao.readUsers(cloneList).size() == 0);
+		Assert.assertTrue(dao.readAuthorityByName("newAuthority") == null);
 
 		u.setAttributes(cloneList);
 		try {
 			dao.update(u);
-			fail("IllegalArgumentException not throw");
+			Assert.fail("IllegalArgumentException not throw");
 		} catch (IllegalArgumentException e) {
 
 		}
-		assertTrue(dao.readAuthorityByName("newAuthority") == null);
-		assertTrue(dao.readUsers(cloneList).size() == 0);
+		Assert.assertTrue(dao.readAuthorityByName("newAuthority") == null);
+		Assert.assertTrue(dao.readUsers(cloneList).size() == 0);
 
 	}
 
-	public void testUpdateUser() {
+	@Test
+	public void updateUser() {
 		User u = dao.readUser("token_3");
 		u.setAuthToken("new_token_3");
 		long id = u.getId();
-		assertTrue(dao.readUser("token_3") != null
+		Assert.assertTrue(dao.readUser("token_3") != null
 				&& dao.readUser("new_token_3") == null);
 		dao.update(u);
-		assertTrue(dao.readUser("token_3") == null
+		Assert.assertTrue(dao.readUser("token_3") == null
 				&& dao.readUser("new_token_3") != null
 				&& id == dao.readUser("new_token_3").getId());
 	}
 
-	public void testRemoveUser() {
+	@Test
+	public void removeUser() {
 		User user = new User();
-		user.setId((long) 3);
+		user.setId((long) 1);
 
-		assertNotNull(dao.readUser((long) 3));
-		assertTrue(dao.delete(user));
-		assertNull(dao.readUser((long) 3));
+		Assert.assertNotNull(dao.readUser((long) 1));
+		Assert.assertTrue(dao.delete(user));
+		Assert.assertNull(dao.readUser((long) 1));
 
-	}
-
-	public void testRemoveAuthority() {
-		Authority auth = new Authority();
-		auth.setId((long) 1);
-		try {
-			dao.delete(auth);
-			fail("Exception not throw");
-		} catch (IllegalArgumentException e) {
-
-		}
-		// auth = new Authority();
-		// auth.setId((long) 3);
-		//
-		// assertNotNull(dao.readAuthorityByName("a12"));
-		// assertTrue(dao.delete(auth));
-		// assertNull(dao.readAuthorityByName("a12"));
-
-		// auth = new Authority();
-		// auth.setName("other_authority");
-		// auth.setRedirectUrl("other_url");
-		// dao.create(auth);
-		// dao.delete(dao.readAuthorityByUrl("other_url"));
 	}
 
 	private void loadData() {
-		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
-		em = emf.createEntityManager();
 		loadAuthorities();
 		loadUsers();
 	}
 
 	private void loadUsers() {
-		em.getTransaction().begin();
-		UserEntity user = new UserEntity();
+		User user = new User();
 		user.setAuthToken(TOKEN_PRESENT);
 		user.setExpTime(1000);
 		user.setSocialId((long) 1001);
-		em.persist(user);
+		user.setAttributes(Collections.<Attribute> emptyList());
+		dao.create(user);
 		System.out.println("Created " + user);
 
-		user = new UserEntity();
+		user = new User();
 		user.setAuthToken("token_2");
 		user.setExpTime(1000);
 		user.setSocialId((long) 1002);
-		em.persist(user);
+		user.setAttributes(loadAttributes());
+		dao.create(user);
 		System.out.println("Created " + user);
-		em.getTransaction().commit();
 
 		User u = new User();
 		u.setAuthToken("token_3");
@@ -347,7 +332,7 @@ public class AcDaoPersistenceImplTest extends TestCase
 		System.out.println("Created " + u);
 	}
 
-	private List<Attribute> loadAttributes() {
+	private static List<Attribute> loadAttributes() {
 		List<Attribute> attrs = new ArrayList<Attribute>();
 
 		Authority auth = new Authority();
@@ -364,31 +349,46 @@ public class AcDaoPersistenceImplTest extends TestCase
 	}
 
 	private void loadAuthorities() {
-		em.getTransaction().begin();
 
-		AuthorityEntity auth = new AuthorityEntity();
+		Authority auth = new Authority();
 		auth.setName(AUTH_NAME_PRESENT);
 		auth.setRedirectUrl(AUTH_URL_PRESENT);
-		em.persist(auth);
+		dao.create(auth);
 		System.out.println("Created " + auth);
-		auth = new AuthorityEntity();
+		auth = new Authority();
 		auth.setName("a11");
 		auth.setRedirectUrl("u11");
-		em.persist(auth);
+		dao.create(auth);
 		System.out.println("Created " + auth);
-		auth = new AuthorityEntity();
-		auth.setName("a12");
-		auth.setRedirectUrl("u12");
-		em.persist(auth);
+		auth = new Authority();
+		auth.setName("TrentoRise");
+		auth.setRedirectUrl("http://www.trentorise.eu");
+		dao.create(auth);
 		System.out.println("Created " + auth);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void cleanDb() {
+		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME);
+		em = emf.createEntityManager();
+		em.getTransaction().begin();
+		Query q = em.createQuery("from UserEntity");
+		List<UserEntity> results = q.getResultList();
+
+		for (UserEntity temp : results) {
+			em.remove(temp);
+		}
+
+		q = em.createQuery("from AuthorityEntity");
+		List<AuthorityEntity> res = q.getResultList();
+
+		for (AuthorityEntity temp : res) {
+			em.remove(temp);
+		}
 		em.getTransaction().commit();
 
-		Authority auth1 = new Authority();
-		auth1.setName("TrentoRise");
-		auth1.setRedirectUrl("http://www.trentorise.eu");
-		dao.create(auth1);
-		System.out.println("Created " + auth1);
-
+		em.close();
+		emf.close();
 	}
 
 }

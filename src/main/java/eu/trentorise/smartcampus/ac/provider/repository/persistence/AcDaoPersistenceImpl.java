@@ -12,11 +12,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
@@ -33,9 +31,6 @@ public class AcDaoPersistenceImpl implements AcDao {
 	EntityManagerFactory emf;
 	@PersistenceContext
 	EntityManager em;
-
-	@Autowired
-	SocialEngineManager socialEngineManager;
 
 	public AcDaoPersistenceImpl(String pu) {
 		emf = Persistence.createEntityManagerFactory(pu);
@@ -185,9 +180,6 @@ public class AcDaoPersistenceImpl implements AcDao {
 							"The object can't be updated because one or more attributes referenced to an nonexistent authority");
 				} else {
 					newAe.setAuthority(auth);
-					//
-					// em.persist(newAe);
-					//
 					toAdd.add(newAe);
 				}
 			}
