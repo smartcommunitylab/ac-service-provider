@@ -40,7 +40,7 @@
 		persistent-id="acserviceprovider.properties">
 		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
 		<!-- social engine client connection info -->
-		<prop key="socialEngine.host">213.21.154.85</prop>
+		<prop key="socialEngine.host">sweb.sc.trentorise.eu</prop>
 		<prop key="socialEngine.port">8080</prop>
 	</osgix:cm-properties>
 
