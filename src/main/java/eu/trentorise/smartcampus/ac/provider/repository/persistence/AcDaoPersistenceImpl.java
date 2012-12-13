@@ -42,6 +42,15 @@ public class AcDaoPersistenceImpl implements AcDao {
 
 	}
 
+	/**
+	 * Persists a object with superclass AcObject. It returns the id of new
+	 * object
+	 * 
+	 * @param acObj
+	 *            object to create
+	 * @return the id of new object
+	 */
+
 	@Override
 	public <T extends AcObject> long create(T acObj) {
 
@@ -87,6 +96,14 @@ public class AcDaoPersistenceImpl implements AcDao {
 		return id;
 	}
 
+	/**
+	 * Updates the object, if objects is instance of User, new attributes are
+	 * persisted and added to user attributes.
+	 * 
+	 * @param acObj
+	 *            object to update
+	 * 
+	 */
 	@Override
 	public <T extends AcObject> void update(T acObj) {
 		if (acObj != null) {
@@ -226,6 +243,14 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 	}
 
+	/**
+	 * Deletes objects. If object is instance of User, it deletes all user
+	 * attributes
+	 * 
+	 * @param acObj
+	 *            object to delete
+	 * @return true if operation ended fine or false otherwise
+	 */
 	@Override
 	public <T extends AcObject> boolean delete(T acObj) {
 
@@ -260,6 +285,13 @@ public class AcDaoPersistenceImpl implements AcDao {
 		return false;
 	}
 
+	/**
+	 * Returns the user given its id
+	 * 
+	 * @param id
+	 *            id of the user
+	 * @return the user or null if no user by that id exists
+	 */
 	@Override
 	public User readUser(long id) {
 		try {
@@ -270,6 +302,13 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 	}
 
+	/**
+	 * Returns the user given its binded authentication token
+	 * 
+	 * @param authToken
+	 *            authentication token binded to the user
+	 * @return the user or null if no user is binded to the token
+	 */
 	@Override
 	public User readUser(String authToken) {
 		try {
@@ -287,6 +326,15 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 	}
 
+	/**
+	 * Returns list of User matching given list of attributes or a empty list if
+	 * no user matches the attributes list
+	 * 
+	 * @param attributes
+	 *            list of attributes that user MUST have
+	 * @return the list of user that matches the list of attributes or a empty
+	 *         list otherwise
+	 */
 	@Override
 	public List<User> readUsers(List<Attribute> attributes) {
 		Query query = em.createQuery("from UserEntity u");
@@ -300,6 +348,11 @@ public class AcDaoPersistenceImpl implements AcDao {
 		return filtered;
 	}
 
+	/**
+	 * Returns all the authorities
+	 * 
+	 * @return the collection of authorities present in the system
+	 */
 	@Override
 	public Collection<Authority> readAuthorities() {
 		Query query = em.createQuery("from AuthorityEntity a");
@@ -307,6 +360,14 @@ public class AcDaoPersistenceImpl implements AcDao {
 
 	}
 
+	/**
+	 * Returns authority by its name or null if no authority exists by the given
+	 * name
+	 * 
+	 * @param name
+	 *            name of authority to search
+	 * @return the authority or null if it doens't exist
+	 */
 	@Override
 	public Authority readAuthorityByName(String name) {
 		try {
@@ -324,6 +385,13 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 	}
 
+	/**
+	 * Returns authority given its url
+	 * 
+	 * @param url
+	 *            the url of authority to search
+	 * @return authority of null if it doesn't exist
+	 */
 	@Override
 	public Authority readAuthorityByUrl(String url) {
 		try {
@@ -341,6 +409,13 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 	}
 
+	/**
+	 * Returns user given its social id
+	 * 
+	 * @param socialId
+	 *            the social id of user
+	 * @return user or null if it doesn't exist
+	 */
 	@Override
 	public User readUserBySocialId(long socialId) {
 		try {

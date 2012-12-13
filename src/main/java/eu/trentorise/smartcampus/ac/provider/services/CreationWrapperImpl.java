@@ -18,6 +18,15 @@ public class CreationWrapperImpl implements CreationWrapper {
 	@Autowired
 	private AcDao dao;
 
+	/**
+	 * Creates a user. Operation is transactional, user is persisted, user space
+	 * is created in social engine and this is associated to user by the social
+	 * id
+	 * 
+	 * @param user
+	 *            the user to create
+	 */
+
 	@Transactional
 	public void create(User user) {
 		try {

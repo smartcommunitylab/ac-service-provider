@@ -4,13 +4,11 @@
  */
 package eu.trentorise.smartcampus.ac.provider.services;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +35,18 @@ public class AcProviderServiceImpl implements AcProviderService {
 	@Autowired
 	private CreationWrapper creationWrapper;
 
-	private SecureRandom random;
-
-	@PostConstruct
-	private void init() {
-		random = new SecureRandom();
-	}
+	/**
+	 * Creates a new user given its data. Creation is transactional
+	 * 
+	 * @param authToken
+	 *            The authentication token for the user
+	 * @param expTime
+	 *            The expiration time
+	 * @param attributes
+	 *            The list of the attributes.
+	 * @throws AcServiceExcetion
+	 *             if some errors are generated during creation operations
+	 */
 
 	@Override
 	public User createUser(String authToken, long expDate,
@@ -58,6 +62,15 @@ public class AcProviderServiceImpl implements AcProviderService {
 		}
 		return user;
 	}
+
+	/**
+	 * Deletes user binded to given authorization token
+	 * 
+	 * @param authToken
+	 *            The authentication token of the user to delete
+	 * @throws AcServiceExcetion
+	 *             if some errors are generated during delete operations
+	 */
 
 	@Override
 	public boolean removeUser(String authToken) throws AcServiceException {
@@ -199,6 +212,12 @@ public class AcProviderServiceImpl implements AcProviderService {
 	public void createAuthority(Authority auth) throws AcServiceException {
 		dao.create(auth);
 	}
+
+	/**
+	 * Returns an unique token
+	 * 
+	 * @return the token generated
+	 */
 
 	@Override
 	public String generateAuthToken() throws AcServiceException {
