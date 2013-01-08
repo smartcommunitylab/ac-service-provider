@@ -22,6 +22,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 
 /**
+ * In-memory implementation of AcDao interface
  * 
  * @author Viktor Pravdin
  */

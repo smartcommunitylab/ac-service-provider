@@ -22,6 +22,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 
 /**
+ * Implementation of the service
  * 
  * @author Viktor Pravdin
  */
@@ -32,6 +33,9 @@ public class AcProviderServiceImpl implements AcProviderService {
 	@Autowired
 	private AcDao dao;
 
+	/**
+	 * Wrapper interface to perform a transaction
+	 */
 	@Autowired
 	private CreationWrapper creationWrapper;
 
@@ -44,6 +48,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 *            The expiration time
 	 * @param attributes
 	 *            The list of the attributes.
+	 * @return the user object created
 	 * @throws AcServiceExcetion
 	 *             if some errors are generated during creation operations
 	 */
@@ -68,6 +73,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * 
 	 * @param authToken
 	 *            The authentication token of the user to delete
+	 * @return true if operation gone right, false otherwise
 	 * @throws AcServiceExcetion
 	 *             if some errors are generated during delete operations
 	 */
@@ -81,11 +87,29 @@ public class AcProviderServiceImpl implements AcProviderService {
 		return false;
 	}
 
+	/**
+	 * Returns the User binded to the given authentication token
+	 * 
+	 * @param authToken
+	 *            authentication token
+	 * @return user object
+	 * @throws AcServiceException
+	 */
 	@Override
 	public User getUserByToken(String authToken) throws AcServiceException {
 		return dao.readUser(authToken);
 	}
 
+	/**
+	 * Returns the subset of users that satisfied all the attributes of the
+	 * given list
+	 * 
+	 * @param attributes
+	 *            the list of attributes that users MUST contains
+	 * @return the list of users that contains all the given attributes or an
+	 *         empty list
+	 * @throws AcServiceException
+	 */
 	@Override
 	public List<User> getUsersByAttributes(List<Attribute> attributes)
 			throws AcServiceException {
@@ -152,6 +176,16 @@ public class AcProviderServiceImpl implements AcProviderService {
 		dao.update(user);
 	}
 
+	/**
+	 * Returns if a user is yet valid
+	 * 
+	 * @param authToken
+	 *            authentication token
+	 * @return true if authentication token is not already expired, false
+	 *         otherwise
+	 * @throws AcServiceException
+	 */
+
 	@Override
 	public boolean isValidUser(String authToken) throws AcServiceException {
 		long time = System.currentTimeMillis();
@@ -173,6 +207,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * @param key
 	 *            The key of the attribute
 	 * @return The set of attributes that match the parameters
+	 * @throws AcServiceException
 	 */
 	@Override
 	public List<Attribute> getUserAttributes(String authToken,
@@ -193,21 +228,50 @@ public class AcProviderServiceImpl implements AcProviderService {
 		return attrs;
 	}
 
+	/**
+	 * Returns all the authorities present in the system
+	 * 
+	 * @return the collection of authorities of an empty list if there aren't
+	 * @throws AcServiceException
+	 */
 	@Override
 	public Collection<Authority> getAuthorities() throws AcServiceException {
 		return dao.readAuthorities();
 	}
 
+	/**
+	 * Returns an authority given its name
+	 * 
+	 * @param name
+	 *            name of the authority
+	 * @return the authority object if exists, null otherwise
+	 * @throws AcServiceException
+	 */
 	@Override
 	public Authority getAuthorityByName(String name) throws AcServiceException {
 		return dao.readAuthorityByName(name);
 	}
 
+	/**
+	 * Returns authority given its url
+	 * 
+	 * @param name
+	 *            the url of authority
+	 * @return authority object if exists, null otherwise
+	 * @throws AcServiceException
+	 */
 	@Override
 	public Authority getAuthorityByUrl(String name) throws AcServiceException {
 		return dao.readAuthorityByUrl(name);
 	}
 
+	/**
+	 * Creates an authority
+	 * 
+	 * @param auth
+	 *            the authority to create
+	 * @throws AcServiceException
+	 */
 	@Override
 	public void createAuthority(Authority auth) throws AcServiceException {
 		dao.create(auth);
@@ -217,6 +281,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * Returns an unique token
 	 * 
 	 * @return the token generated
+	 * @throws AcServiceException
 	 */
 
 	@Override
@@ -224,11 +289,30 @@ public class AcProviderServiceImpl implements AcProviderService {
 		return UUID.randomUUID().toString();
 	}
 
+	/**
+	 * Updates data of an authority
+	 * 
+	 * @param auth
+	 *            the new data of authority
+	 * @throws AcServiceException
+	 */
 	@Override
 	public void updateAuthority(Authority auth) throws AcServiceException {
 		dao.update(auth);
 	}
 
+	/**
+	 * Sets an attribute of a user. Attribute is appended to user attributes if
+	 * it's not present, attribute value is updated otherwise
+	 * 
+	 * @param userId
+	 *            id of the user owner of attribute
+	 * @param attribute
+	 *            attribute to set
+	 * @throws AcServiceException
+	 * @throws IllegalArgumentException
+	 *             if user doesn't exist or attribute parameter is null
+	 */
 	@Override
 	public void setAttribute(long userId, Attribute attribute)
 			throws AcServiceException {

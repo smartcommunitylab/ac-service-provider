@@ -12,6 +12,13 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class manages all the operations between ac-service-provider and the
+ * social engine component
+ * 
+ * @author mirko perillo
+ * 
+ */
 @Component
 public class SocialEngineManager {
 
@@ -20,6 +27,15 @@ public class SocialEngineManager {
 	@Value("${socialEngine.port}")
 	private int socialEnginePort;
 
+	/**
+	 * creates a new social user in the social engine component.
+	 * 
+	 * @param user
+	 *            object user to create
+	 * @return the id of social user created
+	 * @throws SocialEngineException
+	 *             if social engine threw an internal exception
+	 */
 	public long createUser(eu.trentorise.smartcampus.ac.provider.model.User user)
 			throws SocialEngineException {
 		long socialId = -1;
@@ -70,9 +86,5 @@ public class SocialEngineManager {
 		}
 
 		return socialId;
-	}
-
-	private Entity findEntityByExternalId(SCWebApiClient client, String extId) {
-		return null;
 	}
 }

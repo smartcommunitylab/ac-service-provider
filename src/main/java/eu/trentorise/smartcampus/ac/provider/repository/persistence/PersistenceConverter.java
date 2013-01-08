@@ -11,6 +11,13 @@ import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.At
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
 
+/**
+ * The class performs the conversion from and to model classes and persistence
+ * model classes
+ * 
+ * @author mirko perillo
+ * 
+ */
 public class PersistenceConverter {
 
 	public static UserEntity fromUser(User u, boolean create) {

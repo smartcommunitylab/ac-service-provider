@@ -24,6 +24,12 @@ import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.At
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
 
+/**
+ * Persistent implementation of AcDao interface
+ * 
+ * @author mirko perillo
+ * 
+ */
 @Transactional
 @Repository("acPersistenceDao")
 public class AcDaoPersistenceImpl implements AcDao {
