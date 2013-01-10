@@ -183,4 +183,12 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+	
+    <repositories>
+        <repository>
+            <id>SmartCampus</id>
+            <url>http://repository.smartcampuslab.it/content/groups/public</url>
+        </repository>
+    </repositories>
+	
 </project>
