@@ -161,8 +161,8 @@
 		<!-- Social Engine client -->
 		<dependency>
 			<groupId>it.unitn.disi.sweb</groupId>
-			<artifactId>smartcampus-webapi-client</artifactId>
-			<version> 2.6.0-FINAL</version>
+			<artifactId>social-webapi-client</artifactId>
+			<version> 1.0-FINAL</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-beans</artifactId>
