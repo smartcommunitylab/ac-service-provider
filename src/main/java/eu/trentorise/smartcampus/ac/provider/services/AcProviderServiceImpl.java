@@ -25,13 +25,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import javax.jws.WebService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import eu.trentorise.smartcampus.ac.provider.AcProviderService;
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
+import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -42,8 +40,6 @@ import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
  * 
  * @author Viktor Pravdin
  */
-@WebService(endpointInterface = "eu.trentorise.smartcampus.ac.provider.AcProviderService")
-@Service
 public class AcProviderServiceImpl implements AcProviderService {
 
 	@Autowired
@@ -55,6 +51,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 	@Autowired
 	private CreationWrapper creationWrapper;
 
+	@Autowired
+	private SocialEngineManager socialManager;
 	/**
 	 * Creates a new user given its data. Creation is transactional
 	 * 
@@ -68,7 +66,6 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * @throws AcServiceExcetion
 	 *             if some errors are generated during creation operations
 	 */
-
 	@Override
 	public User createUser(String authToken, long expDate,
 			List<Attribute> attributes) throws AcServiceException {
@@ -353,4 +350,30 @@ public class AcProviderServiceImpl implements AcProviderService {
 		}
 		dao.update(user);
 	}
+
+	/**
+	 * Returns true if the user can access the specified resource. Currently, the resource should 
+	 * correspond to the entityId as stored in the Social Engine entity space.
+	 * 
+	 * @return true if the read permission is granted for the resource
+	 * @throws AcServiceException
+	 */
+
+	@Override
+	public boolean canReadResource(String authToken, String resourceId) throws AcServiceException {
+		User user = getUserByToken(authToken);
+		if (user == null) {
+			throw new AcServiceException("User matching the token "+authToken +" is not found.");
+		}
+		try {
+			return socialManager.checkResourceAccess(user.getSocialId(), Long.parseLong(resourceId));
+		} catch (NumberFormatException e) {
+			throw new AcServiceException("Resource ID should be a number.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new AcServiceException("Error reading the access rights: "+e.getMessage());
+		}
+	}
+	
+	
 }

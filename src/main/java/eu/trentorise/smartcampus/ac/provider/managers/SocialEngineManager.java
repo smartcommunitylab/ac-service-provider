@@ -21,6 +21,7 @@ import it.unitn.disi.sweb.webapi.client.smartcampus.SCWebApiClient;
 import it.unitn.disi.sweb.webapi.model.entity.Entity;
 import it.unitn.disi.sweb.webapi.model.entity.EntityBase;
 import it.unitn.disi.sweb.webapi.model.entity.EntityType;
+import it.unitn.disi.sweb.webapi.model.smartcampus.ac.Operation;
 import it.unitn.disi.sweb.webapi.model.smartcampus.social.User;
 
 import java.util.Locale;
@@ -43,6 +44,18 @@ public class SocialEngineManager {
 	@Value("${socialEngine.port}")
 	private int socialEnginePort;
 
+	private SCWebApiClient client = null;
+	
+	private SCWebApiClient getClient() throws SocialEngineException {
+		if (client == null) {
+			client = SCWebApiClient.getInstance(Locale.ENGLISH,
+					socialEngineHost, socialEnginePort);
+			if (!client.ping())
+				throw new SocialEngineException("Social engine not available");
+		}
+		return client;
+	}
+	
 	/**
 	 * creates a new social user in the social engine component.
 	 * 
@@ -55,10 +68,6 @@ public class SocialEngineManager {
 	public long createUser(eu.trentorise.smartcampus.ac.provider.model.User user)
 			throws SocialEngineException {
 		long socialId = -1;
-		SCWebApiClient client = SCWebApiClient.getInstance(Locale.ENGLISH,
-				socialEngineHost, socialEnginePort);
-		if (!client.ping())
-			throw new SocialEngineException("Social engine not available");
 		EntityBase eb = null;
 		String userId = user.getId().toString();
 		Long entityBaseId = null;
@@ -66,33 +75,33 @@ public class SocialEngineManager {
 		try {
 			eb = new EntityBase();
 			eb.setLabel("SC_USER_" + System.currentTimeMillis());
-			entityBaseId = client.create(eb);
+			entityBaseId = getClient().create(eb);
 			// Re-read to get the ID of the default KB
-			eb = client.readEntityBase(entityBaseId);
+			eb = getClient().readEntityBase(entityBaseId);
 
-			EntityType person = client
+			EntityType person = getClient()
 					.readEntityType("person", eb.getKbLabel());
 			Entity entity = new Entity();
 			entity.setEntityBase(eb);
 			entity.setEtype(person);
 			entity.setExternalId(userId);
 
-			entityId = client.create(entity);
+			entityId = getClient().create(entity);
 
 			User socialUser = new User();
 			socialUser.setName("SC_" + System.currentTimeMillis());
 			socialUser.setEntityBaseId(entityBaseId);
 			socialUser.setPersonEntityId(entityId);
-			socialId = client.create(socialUser);
+			socialId = getClient().create(socialUser);
 
 		} catch (Exception e) {
 			try {
 				if (eb != null) {
-					client.deleteEntityBase(eb.getId());
+					getClient().deleteEntityBase(eb.getId());
 				}
 
 				if (entityId != null) {
-					client.deleteEntity(entityId);
+					getClient().deleteEntity(entityId);
 				}
 			} catch (WebApiException e1) {
 				throw new SocialEngineException();
@@ -102,5 +111,9 @@ public class SocialEngineManager {
 		}
 
 		return socialId;
+	}
+	
+	public boolean checkResourceAccess(long socialUserId, long entityId) throws WebApiException, SocialEngineException {
+		return getClient().readPermission(socialUserId, entityId, Operation.READ);
 	}
 }
