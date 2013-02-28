@@ -15,6 +15,7 @@
  */
 package eu.trentorise.smartcampus.ac.provider.services;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -43,6 +44,7 @@ public class RESTAcService implements AcService {
 
 	@Autowired
 	private AcProviderServiceImpl impl = null;
+//	private ACProviderTestImpl impl = new ACProviderTestImpl();
 	@GET
     @Path("/users/me")
     @Produces({"application/xml","application/json"})
@@ -58,10 +60,26 @@ public class RESTAcService implements AcService {
 	@GET
     @Path("/users/me/attributes")
     @Produces({"application/xml","application/json"})
+	public List<Attribute> getUserAttributes(@HeaderParam("AUTH_TOKEN") String authToken) throws AcServiceException {
+		return impl.getUserAttributes(authToken, null, null);
+	}
+	
+	@GET
+    @Path("/users/me/attributes/authorities/{authority}")
+    @Produces({"application/xml","application/json"})
 	public List<Attribute> getUserAttributes(@HeaderParam("AUTH_TOKEN") String authToken,
-			@QueryParam("authority") String authority, @QueryParam("key") String key) throws AcServiceException {
+			@PathParam("authority") String authority) throws AcServiceException {
+		return impl.getUserAttributes(authToken, authority, null);
+	}
+
+	@GET
+    @Path("/users/me/attributes/authorities/{authority}/keys/{key}")
+    @Produces({"application/xml","application/json"})
+	public List<Attribute> getUserAttributes(@HeaderParam("AUTH_TOKEN") String authToken,
+			@PathParam("authority") String authority, @PathParam("key") String key) throws AcServiceException {
 		return impl.getUserAttributes(authToken, authority, key);
 	}
+
 	@GET
     @Path("/resources/{id}/access")
     @Produces({"application/xml","application/json"})
@@ -102,5 +120,33 @@ public class RESTAcService implements AcService {
 	public boolean canReadResource(@HeaderParam("AUTH_TOKEN") String authToken, @PathParam("id") String resourceId, @PathParam("id") long userId) throws AcServiceException {
 		checkUser(authToken, userId);
 		return canReadResource(authToken, resourceId);
+	}
+	
+	
+	/**
+	 * implementation for testing purposes
+	 */
+	class ACProviderTestImpl implements AcService {
+
+		public User getUserByToken(String authToken) throws AcServiceException {
+			User user = new User();
+			user.setId(1L);
+			user.setSocialId(1L);
+			return user;
+		}
+
+		public boolean isValidUser(String authToken) throws AcServiceException {
+			return true;
+		}
+		public List<Attribute> getUserAttributes(String authToken, String authority, String key) throws AcServiceException {
+			Attribute a = new Attribute();
+			a.setKey("key");
+			a.setValue("value");
+			return Collections.singletonList(a);
+		}
+		public boolean canReadResource(String authToken, String resourceId) throws AcServiceException {
+			return true;
+		}
+		
 	}
 }
