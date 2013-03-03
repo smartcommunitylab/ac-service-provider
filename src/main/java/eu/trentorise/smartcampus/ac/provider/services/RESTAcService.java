@@ -58,6 +58,12 @@ public class RESTAcService implements AcService {
 		return impl.isValidUser(authToken);
 	}
 	@GET
+    @Path("/users/me/anonymous")
+    @Produces({"application/xml","application/json"})
+	public boolean isAnonymousUser(@HeaderParam("AUTH_TOKEN") String authToken) throws AcServiceException {
+		return impl.isAnonymousUser(authToken);
+	}
+	@GET
     @Path("/users/me/attributes")
     @Produces({"application/xml","application/json"})
 	public List<Attribute> getUserAttributes(@HeaderParam("AUTH_TOKEN") String authToken) throws AcServiceException {
@@ -107,6 +113,12 @@ public class RESTAcService implements AcService {
 		return isValidUser(authToken);
 	}
 	@GET
+    @Path("/users/{id}/anonymous")
+    @Produces({"application/xml","application/json"})
+	public boolean isAnonymousUser(@HeaderParam("AUTH_TOKEN") String authToken, @PathParam("id") long userId) throws AcServiceException {
+		return isAnonymousUser(authToken);
+	}
+	@GET
     @Path("/users/{id}/attributes")
     @Produces({"application/xml","application/json"})
 	public List<Attribute> getUserAttributes(@HeaderParam("AUTH_TOKEN") String authToken,
@@ -138,6 +150,10 @@ public class RESTAcService implements AcService {
 		public boolean isValidUser(String authToken) throws AcServiceException {
 			return true;
 		}
+		public boolean isAnonymousUser(String authToken) throws AcServiceException {
+			return true;
+		}
+
 		public List<Attribute> getUserAttributes(String authToken, String authority, String key) throws AcServiceException {
 			Attribute a = new Attribute();
 			a.setKey("key");

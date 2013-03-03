@@ -63,6 +63,9 @@ public class WSAcProviderService implements AcProviderService {
 	public boolean isValidUser(String authToken) throws AcServiceException {
 		return impl.isValidUser(authToken);
 	}
+	public boolean isAnonymousUser(String authToken) throws AcServiceException {
+		return impl.isAnonymousUser(authToken);
+	}
 	public List<Attribute> getUserAttributes(String authToken,
 			String authority, String key) throws AcServiceException {
 		return impl.getUserAttributes(authToken, authority, key);

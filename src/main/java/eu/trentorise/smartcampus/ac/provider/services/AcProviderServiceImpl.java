@@ -42,6 +42,8 @@ import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
  */
 public class AcProviderServiceImpl implements AcProviderService {
 
+	private static final Object AUTHORITY_ANONYMOUS = "anonymous";
+
 	@Autowired
 	private AcDao dao;
 
@@ -374,6 +376,26 @@ public class AcProviderServiceImpl implements AcProviderService {
 			throw new AcServiceException("Error reading the access rights: "+e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns true if the user has no or only one 'anonymous' authority attributes.
+	 */
+	@Override
+	public boolean isAnonymousUser(String authToken) throws AcServiceException {
+		User user = getUserByToken(authToken);
+		if (user == null) {
+			throw new AcServiceException("User matching the token "+authToken +" is not found.");
+		}
+		if (user.getAttributes() != null) {
+			for (Attribute a : user.getAttributes()) {
+				if (!a.getAuthority().getName().equals(AUTHORITY_ANONYMOUS)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	
+
 	
 }
