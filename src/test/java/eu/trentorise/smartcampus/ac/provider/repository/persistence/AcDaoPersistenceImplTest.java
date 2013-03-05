@@ -33,12 +33,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import eu.trentorise.smartcampus.ac.provider.AcProviderService;
+import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
+import eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl;
 
 /**
  * Unit test for simple App.
@@ -59,6 +62,7 @@ public class AcDaoPersistenceImplTest
 	private static final String TOKEN_NOT_PRESENT = "dummy_token";
 
 	private static AcDao dao;
+	private static AcProviderService serviceImpl;
 	private static EntityManagerFactory emf;
 	private static EntityManager em;
 
@@ -67,6 +71,7 @@ public class AcDaoPersistenceImplTest
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"spring/config.xml");
 		dao = ctx.getBean("acPersistenceDao", AcDao.class);
+		serviceImpl = ctx.getBean(AcProviderServiceImpl.class);
 	}
 
 	@Before
@@ -307,16 +312,29 @@ public class AcDaoPersistenceImplTest
 	}
 
 	@Test
-	public void removeUser() {
+	public void removeUser() throws AcServiceException, InterruptedException {
 		User user = new User();
-		user.setId((long) 1);
-
+		user.setAuthToken(TOKEN_NOT_PRESENT);
+		user.setExpTime(1000);
+		user.setSocialId(System.currentTimeMillis());
+		user.setAttributes(Collections.<Attribute> emptyList());
+		dao.create(user);
 		Assert.assertNotNull(dao.readUser((long) 1));
-		Assert.assertTrue(dao.delete(user));
-		Assert.assertNull(dao.readUser((long) 1));
-
+		
+		String token = serviceImpl.createSessionToken(1L, System.currentTimeMillis()+1000);
+		Assert.assertTrue(serviceImpl.isValidUser(token));
+		User u = serviceImpl.getUserByToken(token);
+		Assert.assertEquals(u.getAuthToken(), token);
+		Thread.sleep(1000);
+		Assert.assertFalse(serviceImpl.isValidUser(token));
+		
 	}
 
+	@Test
+	public void sessionToken() {
+		
+	}
+	
 	private void loadData() {
 		loadAuthorities();
 		loadUsers();

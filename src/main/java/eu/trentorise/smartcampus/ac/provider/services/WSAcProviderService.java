@@ -46,6 +46,11 @@ public class WSAcProviderService implements AcProviderService {
 		return impl.createUser(authToken, expDate, attributes);
 	}
 
+	@Override
+	public String createSessionToken(long userId, Long expTime) throws AcServiceException {
+		return impl.createSessionToken(userId, expTime);
+	}
+
 	public boolean removeUser(String authToken) throws AcServiceException {
 		return impl.removeUser(authToken);
 	}
