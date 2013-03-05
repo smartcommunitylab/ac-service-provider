@@ -22,7 +22,9 @@ package eu.trentorise.smartcampus.ac.provider.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
+import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
@@ -54,5 +56,10 @@ public interface AcDao {
 	Authority readAuthorityByName(String name);
 
 	Authority readAuthorityByUrl(String url);
+	
+	public String createSessionToken(long userId, Long expTime);
+	
+	public String generateAuthToken();
+
 
 }

@@ -22,10 +22,7 @@ package eu.trentorise.smartcampus.ac.provider.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,7 +33,6 @@ import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
-import eu.trentorise.smartcampus.ac.provider.repository.memory.SessionToken;
 
 /**
  * Implementation of the service
@@ -49,10 +45,6 @@ public class AcProviderServiceImpl implements AcProviderService {
 
 	@Autowired
 	private AcDao dao;
-	
-	private Map<Long, SessionToken> sessionTokenMap = new HashMap<Long, SessionToken>();
-	private Map<String, Long> sessionTokenUserMap = new HashMap<String, Long>();
-
 	/**
 	 * Wrapper interface to perform a transaction
 	 */
@@ -91,12 +83,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 
 	@Override
 	public synchronized String createSessionToken(long userId, Long expTime) throws AcServiceException {
-		String tokenString = null;
-		while (getUserByToken(tokenString = generateAuthToken()) != null);
-		SessionToken token = new SessionToken(tokenString, expTime);
-		sessionTokenMap.put(userId, token);
-		sessionTokenUserMap.put(tokenString, userId);
-		return tokenString;
+		return dao.createSessionToken(userId, expTime);
 	}
 
 
@@ -129,16 +116,6 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 */
 	@Override
 	public User getUserByToken(String authToken) throws AcServiceException {
-		Long userId = sessionTokenUserMap.get(authToken);
-		if (userId != null) {
-			User user = dao.readUser(userId);
-			SessionToken token = sessionTokenMap.get(userId); 
-			if (token != null) {
-				user.setExpTime(token.getExpTime());
-				user.setAuthToken(authToken);
-			}
-			return user;
-		}
 		return dao.readUser(authToken);
 	}
 
@@ -326,9 +303,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * @throws AcServiceException
 	 */
 
-	@Override
 	public String generateAuthToken() throws AcServiceException {
-		return UUID.randomUUID().toString();
+		return dao.generateAuthToken();
 	}
 
 	/**

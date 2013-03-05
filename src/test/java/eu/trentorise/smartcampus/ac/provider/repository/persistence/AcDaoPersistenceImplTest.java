@@ -312,7 +312,17 @@ public class AcDaoPersistenceImplTest
 	}
 
 	@Test
-	public void removeUser() throws AcServiceException, InterruptedException {
+	public void removeUser() {
+		User user = new User();
+		user.setId((long) 1);
+
+		Assert.assertNotNull(dao.readUser((long) 1));
+		Assert.assertTrue(dao.delete(user));
+		Assert.assertNull(dao.readUser((long) 1));
+	}
+
+	@Test
+	public void sessionToken() throws AcServiceException, InterruptedException {
 		User user = new User();
 		user.setAuthToken(TOKEN_NOT_PRESENT);
 		user.setExpTime(1000);
@@ -321,18 +331,12 @@ public class AcDaoPersistenceImplTest
 		dao.create(user);
 		Assert.assertNotNull(dao.readUser((long) 1));
 		
-		String token = serviceImpl.createSessionToken(1L, System.currentTimeMillis()+1000);
+		String token = dao.createSessionToken(1L, System.currentTimeMillis()+1000);
 		Assert.assertTrue(serviceImpl.isValidUser(token));
-		User u = serviceImpl.getUserByToken(token);
+		User u = dao.readUser(token);
 		Assert.assertEquals(u.getAuthToken(), token);
 		Thread.sleep(1000);
 		Assert.assertFalse(serviceImpl.isValidUser(token));
-		
-	}
-
-	@Test
-	public void sessionToken() {
-		
 	}
 	
 	private void loadData() {

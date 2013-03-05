@@ -19,6 +19,7 @@ package eu.trentorise.smartcampus.ac.provider.repository.persistence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -116,6 +117,22 @@ public class AcDaoPersistenceImpl implements AcDao {
 		}
 
 		return id;
+	}
+
+	@Override
+	public String createSessionToken(long userId, Long expTime) {
+		String tokenString = null;
+		while (userExists(tokenString = generateAuthToken()));
+		UserEntity ue = (UserEntity) em.find(UserEntity.class, userId);
+		ue.setSessionAuthToken(tokenString);
+		ue.setSessionExpTime(expTime);
+		em.merge(ue);
+		return tokenString;
+	}
+
+	@Override
+	public String generateAuthToken() {
+		return UUID.randomUUID().toString();
 	}
 
 	/**
@@ -335,16 +352,37 @@ public class AcDaoPersistenceImpl implements AcDao {
 	public User readUser(String authToken) {
 		try {
 			Query query = em
-					.createQuery("from UserEntity u where u.authToken= :authToken");
+					.createQuery("from UserEntity u where u.authToken= :authToken or u.sessionAuthToken = :authToken");
 			query.setParameter("authToken", authToken);
 			try {
-				return PersistenceConverter.toUser((UserEntity) query
-						.getSingleResult());
+				UserEntity ue = (UserEntity) query.getSingleResult();
+				User u = PersistenceConverter.toUser(ue);
+				if (authToken != null && authToken.equals(ue.getSessionAuthToken())) {
+					u.setAuthToken(ue.getSessionAuthToken());
+					u.setExpTime(ue.getSessionExpTime());
+				}
+				return u;
 			} catch (NoResultException e) {
 				return null;
 			}
 		} catch (NullPointerException e) {
 			return null;
+		}
+	}
+	
+	private boolean userExists(String authToken) {
+		try {
+			Query query = em
+					.createQuery("from UserEntity u where u.authToken= :authToken or u.sessionAuthToken = :authToken");
+			query.setParameter("authToken", authToken);
+			try {
+				query.getSingleResult();
+				return true;
+			} catch (NoResultException e) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
