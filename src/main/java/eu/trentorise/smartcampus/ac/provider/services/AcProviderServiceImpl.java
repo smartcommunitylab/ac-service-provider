@@ -175,23 +175,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 			user.setExpTime(expTime);
 		}
 
-		List<Attribute> temp = new ArrayList<Attribute>();
-		for (Attribute newAttr : attributes) {
-			boolean founded = false;
-			for (Attribute presentAttr : user.getAttributes()) {
-				if (presentAttr.getAuthority().equals(newAttr.getAuthority())
-						&& presentAttr.getKey().equals(newAttr.getKey())) {
-					presentAttr.setValue(newAttr.getValue());
-					founded = true;
-					break;
-				}
-			}
-			if (!founded) {
-				temp.add(newAttr);
-			}
-		}
-
-		user.getAttributes().addAll(temp);
+		user.getAttributes().clear();
+		if (attributes != null) user.getAttributes().addAll(attributes);
 		dao.update(user);
 	}
 

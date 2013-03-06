@@ -309,6 +309,20 @@ public class AcDaoPersistenceImplTest
 		Assert.assertTrue(dao.readUser("token_3") == null
 				&& dao.readUser("new_token_3") != null
 				&& id == dao.readUser("new_token_3").getId());
+		
+		u.getAttributes().clear();
+		Authority auth = new Authority();
+		auth.setName("TrentoRise");
+		auth.setRedirectUrl("http://www.trentorise.eu");
+		Attribute a = new Attribute();
+		a.setKey("newProjectName");
+		a.setValue("newSC");
+		a.setAuthority(auth);
+		u.getAttributes().add(a);
+		dao.update(u);
+		Assert.assertTrue((u = dao.readUser("new_token_3")) != null
+				&& u.getAttributes().size() == 1 &&
+				u.getAttributes().get(0).getKey().equals("newProjectName"));
 	}
 
 	@Test

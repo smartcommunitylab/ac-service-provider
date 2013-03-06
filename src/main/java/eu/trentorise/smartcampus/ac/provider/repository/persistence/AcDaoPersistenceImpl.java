@@ -18,6 +18,7 @@ package eu.trentorise.smartcampus.ac.provider.repository.persistence;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -215,17 +216,25 @@ public class AcDaoPersistenceImpl implements AcDao {
 	private UserEntity updateAttributes(UserEntity ue, User u)
 			throws IllegalArgumentException {
 		List<AttributeEntity> toAdd = new ArrayList<AttributeEntity>();
+		
+		for (Iterator<AttributeEntity> iterator = ue.getAttributeEntities().iterator(); iterator.hasNext();) {
+			AttributeEntity ae = iterator.next();
+			iterator.remove();
+			em.remove(ae);
+		}
+//		for (AttributeEntity ae : ue.getAttributeEntities()) {
+//			em.remove(ae);
+//		}
+//		
 		for (Attribute a : u.getAttributes()) {
-			boolean found = false;
-			for (AttributeEntity ae : ue.getAttributeEntities()) {
-				if (found = PersistenceConverter.isSame(ae, a)) {
-					ae.setValue(a.getValue());
-					break;
-				}
-			}
-			// if it is a new attribute, it's persisted and added to
-			// attribute list
-			if (!found) {
+//			boolean found = false;
+//			for (AttributeEntity ae : ue.getAttributeEntities()) {
+//				if (found = PersistenceConverter.isSame(ae, a)) {
+//					ae.setValue(a.getValue());
+//					break;
+//				}
+//			}
+//			if (!found) {
 				AttributeEntity newAe = new AttributeEntity();
 				newAe.setKey(a.getKey());
 				newAe.setValue(a.getValue());
@@ -238,7 +247,7 @@ public class AcDaoPersistenceImpl implements AcDao {
 					newAe.setAuthority(auth);
 					toAdd.add(newAe);
 				}
-			}
+//			}
 		}
 		ue.getAttributeEntities().addAll(toAdd);
 		return ue;

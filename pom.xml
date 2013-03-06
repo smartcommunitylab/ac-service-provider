@@ -69,8 +69,6 @@
                             org.apache.cxf.jaxrs.utils,
                             org.apache.cxf.transport.http,
                             org.springframework.beans.factory.config,
-                            org.apache.commons.httpclient,
-                            org.apache.commons.httpclient.methods,
 							!*
 						</Import-Package>
 					</instructions>
