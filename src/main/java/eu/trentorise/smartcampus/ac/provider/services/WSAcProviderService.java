@@ -39,7 +39,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 public class WSAcProviderService implements AcProviderService {
 
 	@Autowired
-	private AcProviderServiceImpl impl = null;
+	private TXAcProviderService impl = null;
 	
 	public User createUser(String authToken, long expDate,
 			List<Attribute> attributes) throws AcServiceException {

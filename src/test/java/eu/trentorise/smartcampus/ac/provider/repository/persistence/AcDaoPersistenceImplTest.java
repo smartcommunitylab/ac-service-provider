@@ -41,7 +41,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
-import eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl;
+import eu.trentorise.smartcampus.ac.provider.services.TXAcProviderService;
 
 /**
  * Unit test for simple App.
@@ -71,7 +71,7 @@ public class AcDaoPersistenceImplTest
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"spring/config.xml");
 		dao = ctx.getBean("acPersistenceDao", AcDao.class);
-		serviceImpl = ctx.getBean(AcProviderServiceImpl.class);
+		serviceImpl = ctx.getBean(TXAcProviderService.class);
 	}
 
 	@Before

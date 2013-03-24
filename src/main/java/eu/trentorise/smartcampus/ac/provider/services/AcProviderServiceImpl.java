@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
-import eu.trentorise.smartcampus.ac.provider.AcProviderService;
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
@@ -39,7 +39,8 @@ import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
  * 
  * @author Viktor Pravdin
  */
-public class AcProviderServiceImpl implements AcProviderService {
+@Transactional
+public class AcProviderServiceImpl implements TXAcProviderService {
 
 	private static final Object AUTHORITY_ANONYMOUS = "anonymous";
 
@@ -76,6 +77,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 		try {
 			creationWrapper.create(user);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new AcServiceException(e);
 		}
 		return user;

@@ -43,7 +43,7 @@ import eu.trentorise.smartcampus.ac.provider.model.User;
 public class RESTAcService implements AcService {
 
 	@Autowired
-	private AcProviderServiceImpl impl = null;
+	private TXAcProviderService impl = null;
 //	private ACProviderTestImpl impl = new ACProviderTestImpl();
 	@GET
     @Path("/users/me")

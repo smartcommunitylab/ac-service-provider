@@ -58,6 +58,7 @@ public class CreationWrapperImpl implements CreationWrapper {
 			user.setSocialId(socialEngineManager.createUser(user));
 			dao.update(user);
 		} catch (SocialEngineException e) {
+			e.printStackTrace();
 			throw new IllegalArgumentException(e);
 		}
 	}

@@ -24,6 +24,7 @@ import it.unitn.disi.sweb.webapi.model.entity.EntityType;
 import it.unitn.disi.sweb.webapi.model.smartcampus.ac.Operation;
 import it.unitn.disi.sweb.webapi.model.smartcampus.social.User;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ public class SocialEngineManager {
 			throws SocialEngineException {
 		long socialId = -1;
 		EntityBase eb = null;
-		String userId = user.getId().toString();
+//		String userId = user.getId().toString();
 		Long entityBaseId = null;
 		Long entityId = null;
 		try {
@@ -84,7 +85,7 @@ public class SocialEngineManager {
 			Entity entity = new Entity();
 			entity.setEntityBase(eb);
 			entity.setEtype(person);
-			entity.setExternalId(userId);
+//			entity.setExternalId(userId);
 
 			entityId = getClient().create(entity);
 
@@ -115,5 +116,14 @@ public class SocialEngineManager {
 	
 	public boolean checkResourceAccess(long socialUserId, long entityId) throws WebApiException, SocialEngineException {
 		return getClient().readPermission(socialUserId, entityId, Operation.READ);
+	}
+	
+	public static void main(String[] args) throws SocialEngineException {
+		SocialEngineManager mgr = new SocialEngineManager();
+		mgr.client = SCWebApiClient.getInstance(Locale.ENGLISH, "sweb.smartcampuslab.it", 8080);
+		eu.trentorise.smartcampus.ac.provider.model.User u = new eu.trentorise.smartcampus.ac.provider.model.User();
+		u.setId(100L);
+		mgr.createUser(u);
+		
 	}
 }

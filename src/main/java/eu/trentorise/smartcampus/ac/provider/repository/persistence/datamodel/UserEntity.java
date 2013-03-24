@@ -39,8 +39,9 @@ public class UserEntity implements Serializable {
 	@GeneratedValue
 	private Long id;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL }, orphanRemoval = true)
-	@JoinColumn(name = "USER_ID")
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST,
+			CascadeType.REMOVE, CascadeType.MERGE })
+	@JoinColumn(name = "USER_ID", nullable=false)
 	private Set<AttributeEntity> attributeEntities;
 
 	@Column(name = "AUTH_TOKEN")
