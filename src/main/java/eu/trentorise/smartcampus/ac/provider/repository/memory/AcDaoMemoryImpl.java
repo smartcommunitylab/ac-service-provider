@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -48,6 +49,9 @@ public class AcDaoMemoryImpl implements AcDao {
 	final Map<Class<?>, AtomicLong> ids = new HashMap<Class<?>, AtomicLong>();
 	final Map<Class<?>, Map<Long, ? extends AcObject>> cache = new ConcurrentHashMap<Class<?>, Map<Long, ? extends AcObject>>();
 
+	final Map<Long, SessionToken> sessionTokenMap = new HashMap<Long, SessionToken>();
+	final Map<String, Long> sessionTokenUserMap = new HashMap<String, Long>();
+
 	@Override
 	public <T extends AcObject> long create(T acObj) {
 		acObj.setId(getNextId(acObj.getClass()));
@@ -68,6 +72,22 @@ public class AcDaoMemoryImpl implements AcDao {
 		}
 		return acObj.getId();
 	}
+
+	@Override
+	public String createSessionToken(long userId, Long expTime) {
+		String tokenString = null;
+		while (readUser(tokenString = generateAuthToken()) != null);
+		SessionToken token = new SessionToken(tokenString, expTime);
+		sessionTokenMap.put(userId, token);
+		sessionTokenUserMap.put(tokenString, userId);
+		return tokenString;
+	}
+
+	@Override
+	public String generateAuthToken() {
+		return UUID.randomUUID().toString();
+	}
+
 
 	@Override
 	public <T extends AcObject> void update(T acObj) {
@@ -119,6 +139,17 @@ public class AcDaoMemoryImpl implements AcDao {
 
 	@Override
 	public User readUser(String authToken) {
+		Long userId = sessionTokenUserMap.get(authToken);
+		if (userId != null) {
+			User user = readUser(userId);
+			SessionToken token = sessionTokenMap.get(userId); 
+			if (token != null) {
+				user.setExpTime(token.getExpTime());
+				user.setAuthToken(authToken);
+			}
+			return user;
+		}
+		
 		User result = null;
 		Map<Long, User> map = (Map<Long, User>) cache.get(User.class);
 		if (map != null) {

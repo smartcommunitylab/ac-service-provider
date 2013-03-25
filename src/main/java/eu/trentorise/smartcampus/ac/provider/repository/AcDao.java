@@ -54,5 +54,10 @@ public interface AcDao {
 	Authority readAuthorityByName(String name);
 
 	Authority readAuthorityByUrl(String url);
+	
+	public String createSessionToken(long userId, Long expTime);
+	
+	public String generateAuthToken();
+
 
 }

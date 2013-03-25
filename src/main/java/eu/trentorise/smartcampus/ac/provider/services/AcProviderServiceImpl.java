@@ -23,15 +23,12 @@ package eu.trentorise.smartcampus.ac.provider.services;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
-
-import javax.jws.WebService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import eu.trentorise.smartcampus.ac.provider.AcProviderService;
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
+import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -42,19 +39,21 @@ import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
  * 
  * @author Viktor Pravdin
  */
-@WebService(endpointInterface = "eu.trentorise.smartcampus.ac.provider.AcProviderService")
-@Service
-public class AcProviderServiceImpl implements AcProviderService {
+@Transactional
+public class AcProviderServiceImpl implements TXAcProviderService {
+
+	private static final Object AUTHORITY_ANONYMOUS = "anonymous";
 
 	@Autowired
 	private AcDao dao;
-
 	/**
 	 * Wrapper interface to perform a transaction
 	 */
 	@Autowired
 	private CreationWrapper creationWrapper;
 
+	@Autowired
+	private SocialEngineManager socialManager;
 	/**
 	 * Creates a new user given its data. Creation is transactional
 	 * 
@@ -68,7 +67,6 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * @throws AcServiceExcetion
 	 *             if some errors are generated during creation operations
 	 */
-
 	@Override
 	public User createUser(String authToken, long expDate,
 			List<Attribute> attributes) throws AcServiceException {
@@ -79,10 +77,17 @@ public class AcProviderServiceImpl implements AcProviderService {
 		try {
 			creationWrapper.create(user);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new AcServiceException(e);
 		}
 		return user;
 	}
+
+	@Override
+	public synchronized String createSessionToken(long userId, Long expTime) throws AcServiceException {
+		return dao.createSessionToken(userId, expTime);
+	}
+
 
 	/**
 	 * Deletes user binded to given authorization token
@@ -96,7 +101,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 
 	@Override
 	public boolean removeUser(String authToken) throws AcServiceException {
-		User user = dao.readUser(authToken);
+		User user = getUserByToken(authToken);
 		if (user != null) {
 			return dao.delete(user);
 		}
@@ -172,23 +177,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 			user.setExpTime(expTime);
 		}
 
-		List<Attribute> temp = new ArrayList<Attribute>();
-		for (Attribute newAttr : attributes) {
-			boolean founded = false;
-			for (Attribute presentAttr : user.getAttributes()) {
-				if (presentAttr.getAuthority().equals(newAttr.getAuthority())
-						&& presentAttr.getKey().equals(newAttr.getKey())) {
-					presentAttr.setValue(newAttr.getValue());
-					founded = true;
-					break;
-				}
-			}
-			if (!founded) {
-				temp.add(newAttr);
-			}
-		}
-
-		user.getAttributes().addAll(temp);
+		user.getAttributes().clear();
+		if (attributes != null) user.getAttributes().addAll(attributes);
 		dao.update(user);
 	}
 
@@ -205,7 +195,7 @@ public class AcProviderServiceImpl implements AcProviderService {
 	@Override
 	public boolean isValidUser(String authToken) throws AcServiceException {
 		long time = System.currentTimeMillis();
-		User user = dao.readUser(authToken);
+		User user = getUserByToken(authToken);
 		return user != null && ((user.getExpTime() - time) > 0);
 	}
 
@@ -300,9 +290,8 @@ public class AcProviderServiceImpl implements AcProviderService {
 	 * @throws AcServiceException
 	 */
 
-	@Override
 	public String generateAuthToken() throws AcServiceException {
-		return UUID.randomUUID().toString();
+		return dao.generateAuthToken();
 	}
 
 	/**
@@ -353,4 +342,50 @@ public class AcProviderServiceImpl implements AcProviderService {
 		}
 		dao.update(user);
 	}
+
+	/**
+	 * Returns true if the user can access the specified resource. Currently, the resource should 
+	 * correspond to the entityId as stored in the Social Engine entity space.
+	 * 
+	 * @return true if the read permission is granted for the resource
+	 * @throws AcServiceException
+	 */
+
+	@Override
+	public boolean canReadResource(String authToken, String resourceId) throws AcServiceException {
+		User user = getUserByToken(authToken);
+		if (user == null) {
+			throw new AcServiceException("User matching the token "+authToken +" is not found.");
+		}
+		try {
+			return socialManager.checkResourceAccess(user.getSocialId(), Long.parseLong(resourceId));
+		} catch (NumberFormatException e) {
+			throw new AcServiceException("Resource ID should be a number.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new AcServiceException("Error reading the access rights: "+e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns true if the user has no or only one 'anonymous' authority attributes.
+	 */
+	@Override
+	public boolean isAnonymousUser(String authToken) throws AcServiceException {
+		User user = getUserByToken(authToken);
+		if (user == null) {
+			throw new AcServiceException("User matching the token "+authToken +" is not found.");
+		}
+		if (user.getAttributes() != null) {
+			for (Attribute a : user.getAttributes()) {
+				if (!a.getAuthority().getName().equals(AUTHORITY_ANONYMOUS)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+
+	
 }

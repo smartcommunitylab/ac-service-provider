@@ -24,7 +24,7 @@
 	xmlns:osgi="http://www.springframework.org/schema/osgi" xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
 	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 	http://www.springframework.org/schema/context
 	http://www.springframework.org/schema/context/spring-context-3.0.xsd
 	http://cxf.apache.org/jaxrs
@@ -41,22 +41,34 @@
 
 	<context:component-scan base-package="eu.trentorise.smartcampus.ac.provider" />
 
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/osgi/cxf-extension-osgi.xml" />
 
 	<bean id="dao"
 		class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
 
+    <jaxrs:server id="acServiceRest" address="${service.public.endpointAddress}">
+        <jaxrs:serviceBeans>
+                    <ref bean="RESTEndpointImpl"/>
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
 
+    <bean id="RESTEndpointImpl" class="eu.trentorise.smartcampus.ac.provider.services.RESTAcService"/>
 
-	<bean id="endpointImplementor"
+    <bean id="wsEndpointImpl"
+        class="eu.trentorise.smartcampus.ac.provider.services.WSAcProviderService" />
+
+	<bean id="acProviderImpl"
 		class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl" />
 
 	<jaxws:endpoint id="acProviderServiceEndpoint"
-		implementor="#endpointImplementor" address="${service.soap.endpointAddress}" />
+		implementor="#wsEndpointImpl" address="${service.soap.endpointAddress}" />
 
 	<!-- Default values used if there is no property file or value -->
 	<osgix:cm-properties id="preProps"
 		persistent-id="acserviceprovider.properties">
 		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
+        <prop key="service.public.endpointAddress">http://localhost:8383/acService/rest</prop>
 		<!-- social engine client connection info -->
 		<prop key="socialEngine.host">sweb.sc.trentorise.eu</prop>
 		<prop key="socialEngine.port">8080</prop>
@@ -83,7 +95,6 @@
 			</props>
 		</property>
 	</bean>
-
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />

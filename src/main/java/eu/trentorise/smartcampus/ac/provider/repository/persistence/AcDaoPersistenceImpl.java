@@ -18,7 +18,9 @@ package eu.trentorise.smartcampus.ac.provider.repository.persistence;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -118,6 +120,22 @@ public class AcDaoPersistenceImpl implements AcDao {
 		return id;
 	}
 
+	@Override
+	public String createSessionToken(long userId, Long expTime) {
+		String tokenString = null;
+		while (userExists(tokenString = generateAuthToken()));
+		UserEntity ue = (UserEntity) em.find(UserEntity.class, userId);
+		ue.setSessionAuthToken(tokenString);
+		ue.setSessionExpTime(expTime);
+		em.merge(ue);
+		return tokenString;
+	}
+
+	@Override
+	public String generateAuthToken() {
+		return UUID.randomUUID().toString();
+	}
+
 	/**
 	 * Updates the object, if objects is instance of User, new attributes are
 	 * persisted and added to user attributes.
@@ -198,17 +216,25 @@ public class AcDaoPersistenceImpl implements AcDao {
 	private UserEntity updateAttributes(UserEntity ue, User u)
 			throws IllegalArgumentException {
 		List<AttributeEntity> toAdd = new ArrayList<AttributeEntity>();
+		
+		for (Iterator<AttributeEntity> iterator = ue.getAttributeEntities().iterator(); iterator.hasNext();) {
+			AttributeEntity ae = iterator.next();
+			iterator.remove();
+			em.remove(ae);
+		}
+//		for (AttributeEntity ae : ue.getAttributeEntities()) {
+//			em.remove(ae);
+//		}
+//		
 		for (Attribute a : u.getAttributes()) {
-			boolean found = false;
-			for (AttributeEntity ae : ue.getAttributeEntities()) {
-				if (found = PersistenceConverter.isSame(ae, a)) {
-					ae.setValue(a.getValue());
-					break;
-				}
-			}
-			// if it is a new attribute, it's persisted and added to
-			// attribute list
-			if (!found) {
+//			boolean found = false;
+//			for (AttributeEntity ae : ue.getAttributeEntities()) {
+//				if (found = PersistenceConverter.isSame(ae, a)) {
+//					ae.setValue(a.getValue());
+//					break;
+//				}
+//			}
+//			if (!found) {
 				AttributeEntity newAe = new AttributeEntity();
 				newAe.setKey(a.getKey());
 				newAe.setValue(a.getValue());
@@ -221,7 +247,7 @@ public class AcDaoPersistenceImpl implements AcDao {
 					newAe.setAuthority(auth);
 					toAdd.add(newAe);
 				}
-			}
+//			}
 		}
 		ue.getAttributeEntities().addAll(toAdd);
 		return ue;
@@ -335,16 +361,37 @@ public class AcDaoPersistenceImpl implements AcDao {
 	public User readUser(String authToken) {
 		try {
 			Query query = em
-					.createQuery("from UserEntity u where u.authToken= :authToken");
+					.createQuery("from UserEntity u where u.authToken= :authToken or u.sessionAuthToken = :authToken");
 			query.setParameter("authToken", authToken);
 			try {
-				return PersistenceConverter.toUser((UserEntity) query
-						.getSingleResult());
+				UserEntity ue = (UserEntity) query.getSingleResult();
+				User u = PersistenceConverter.toUser(ue);
+				if (authToken != null && authToken.equals(ue.getSessionAuthToken())) {
+					u.setAuthToken(ue.getSessionAuthToken());
+					u.setExpTime(ue.getSessionExpTime());
+				}
+				return u;
 			} catch (NoResultException e) {
 				return null;
 			}
 		} catch (NullPointerException e) {
 			return null;
+		}
+	}
+	
+	private boolean userExists(String authToken) {
+		try {
+			Query query = em
+					.createQuery("from UserEntity u where u.authToken= :authToken or u.sessionAuthToken = :authToken");
+			query.setParameter("authToken", authToken);
+			try {
+				query.getSingleResult();
+				return true;
+			} catch (NoResultException e) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
 		}
 	}
 

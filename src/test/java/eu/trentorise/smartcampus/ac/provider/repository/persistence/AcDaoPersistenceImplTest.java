@@ -33,12 +33,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import eu.trentorise.smartcampus.ac.provider.AcProviderService;
+import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
+import eu.trentorise.smartcampus.ac.provider.services.TXAcProviderService;
 
 /**
  * Unit test for simple App.
@@ -59,6 +62,7 @@ public class AcDaoPersistenceImplTest
 	private static final String TOKEN_NOT_PRESENT = "dummy_token";
 
 	private static AcDao dao;
+	private static AcProviderService serviceImpl;
 	private static EntityManagerFactory emf;
 	private static EntityManager em;
 
@@ -67,6 +71,7 @@ public class AcDaoPersistenceImplTest
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"spring/config.xml");
 		dao = ctx.getBean("acPersistenceDao", AcDao.class);
+		serviceImpl = ctx.getBean(TXAcProviderService.class);
 	}
 
 	@Before
@@ -304,6 +309,20 @@ public class AcDaoPersistenceImplTest
 		Assert.assertTrue(dao.readUser("token_3") == null
 				&& dao.readUser("new_token_3") != null
 				&& id == dao.readUser("new_token_3").getId());
+		
+		u.getAttributes().clear();
+		Authority auth = new Authority();
+		auth.setName("TrentoRise");
+		auth.setRedirectUrl("http://www.trentorise.eu");
+		Attribute a = new Attribute();
+		a.setKey("newProjectName");
+		a.setValue("newSC");
+		a.setAuthority(auth);
+		u.getAttributes().add(a);
+		dao.update(u);
+		Assert.assertTrue((u = dao.readUser("new_token_3")) != null
+				&& u.getAttributes().size() == 1 &&
+				u.getAttributes().get(0).getKey().equals("newProjectName"));
 	}
 
 	@Test
@@ -314,9 +333,26 @@ public class AcDaoPersistenceImplTest
 		Assert.assertNotNull(dao.readUser((long) 1));
 		Assert.assertTrue(dao.delete(user));
 		Assert.assertNull(dao.readUser((long) 1));
-
 	}
 
+	@Test
+	public void sessionToken() throws AcServiceException, InterruptedException {
+		User user = new User();
+		user.setAuthToken(TOKEN_NOT_PRESENT);
+		user.setExpTime(1000);
+		user.setSocialId(System.currentTimeMillis());
+		user.setAttributes(Collections.<Attribute> emptyList());
+		dao.create(user);
+		Assert.assertNotNull(dao.readUser((long) 1));
+		
+		String token = dao.createSessionToken(1L, System.currentTimeMillis()+1000);
+		Assert.assertTrue(serviceImpl.isValidUser(token));
+		User u = dao.readUser(token);
+		Assert.assertEquals(u.getAuthToken(), token);
+		Thread.sleep(1000);
+		Assert.assertFalse(serviceImpl.isValidUser(token));
+	}
+	
 	private void loadData() {
 		loadAuthorities();
 		loadUsers();

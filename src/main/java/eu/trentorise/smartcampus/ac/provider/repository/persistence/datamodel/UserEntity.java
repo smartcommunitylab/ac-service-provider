@@ -41,7 +41,7 @@ public class UserEntity implements Serializable {
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST,
 			CascadeType.REMOVE, CascadeType.MERGE })
-	@JoinColumn(name = "USER_ID")
+	@JoinColumn(name = "USER_ID", nullable=false)
 	private Set<AttributeEntity> attributeEntities;
 
 	@Column(name = "AUTH_TOKEN")
@@ -52,6 +52,12 @@ public class UserEntity implements Serializable {
 
 	@Column(name = "SOCIAL_ID")
 	private Long socialId;
+
+	@Column(name = "SESSION_AUTH_TOKEN")
+	private String sessionAuthToken;
+
+	@Column(name = "SESSION_TOKEN_EXP_TIME")
+	private long sessionExpTime;
 
 	public Long getId() {
 		return id;
@@ -83,6 +89,34 @@ public class UserEntity implements Serializable {
 
 	public void setExpTime(long expTime) {
 		this.expTime = expTime;
+	}
+
+	/**
+	 * @return the sessionAuthToken
+	 */
+	public String getSessionAuthToken() {
+		return sessionAuthToken;
+	}
+
+	/**
+	 * @param sessionAuthToken the sessionAuthToken to set
+	 */
+	public void setSessionAuthToken(String sessionAuthToken) {
+		this.sessionAuthToken = sessionAuthToken;
+	}
+
+	/**
+	 * @return the sessionExpTime
+	 */
+	public long getSessionExpTime() {
+		return sessionExpTime;
+	}
+
+	/**
+	 * @param sessionExpTime the sessionExpTime to set
+	 */
+	public void setSessionExpTime(long sessionExpTime) {
+		this.sessionExpTime = sessionExpTime;
 	}
 
 	@Override
