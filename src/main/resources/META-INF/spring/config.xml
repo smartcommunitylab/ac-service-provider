@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2012-2013 Trento RISE
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:osgi="http://www.springframework.org/schema/osgi" xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://cxf.apache.org/jaxrs
+	http://cxf.apache.org/schemas/jaxrs.xsd
+	http://cxf.apache.org/jaxws
+	http://cxf.apache.org/schemas/jaxws.xsd
+	http://camel.apache.org/schema/spring
+	http://camel.apache.org/schema/spring/camel-spring.xsd
+	http://www.springframework.org/schema/osgi-compendium
+	http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+	<context:component-scan base-package="eu.trentorise.smartcampus.ac.provider" />
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/osgi/cxf-extension-osgi.xml" />
+
+	<bean id="dao"
+		class="eu.trentorise.smartcampus.ac.provider.repository.persistence.AcDaoPersistenceImpl" />
+
+    <jaxrs:server id="acServiceRest" address="${service.public.endpointAddress}">
+        <jaxrs:serviceBeans>
+                    <ref bean="RESTEndpointImpl"/>
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
+    <bean id="RESTEndpointImpl" class="eu.trentorise.smartcampus.ac.provider.services.RESTAcService"/>
+
+    <bean id="wsEndpointImpl"
+        class="eu.trentorise.smartcampus.ac.provider.services.WSAcProviderService" />
+
+	<bean id="acProviderImpl"
+		class="eu.trentorise.smartcampus.ac.provider.services.AcProviderServiceImpl" />
+
+	<jaxws:endpoint id="acProviderServiceEndpoint"
+		implementor="#wsEndpointImpl" address="${service.soap.endpointAddress}" />
+
+	<!-- Default values used if there is no property file or value -->
+	<osgix:cm-properties id="preProps"
+		persistent-id="acserviceprovider.properties">
+		<prop key="service.soap.endpointAddress">http://localhost:8181/acService</prop>
+        <prop key="service.public.endpointAddress">http://localhost:8383/acService/rest</prop>
+		<!-- social engine client connection info -->
+		<prop key="socialEngine.host">sweb.sc.trentorise.eu</prop>
+		<prop key="socialEngine.port">8080</prop>
+	</osgix:cm-properties>
+
+	<context:property-placeholder
+		properties-ref="preProps" />
+
+	<!-- PERSISTENCE CONFIGURATION -->
+
+	<!-- Data Source -->
+	<osgi:reference id="datasource" interface="javax.sql.DataSource"
+		filter="(osgi.jndi.service.name=smartDS)" />
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="datasource" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<!-- uncomment to update db schema -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="datasource" />
+	</bean>
+	<bean id="persistenceAnnotation"
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
