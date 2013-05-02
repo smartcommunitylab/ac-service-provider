@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Repository;
 
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -51,6 +52,7 @@ public class AcDaoMemoryImpl implements AcDao {
 
 	final Map<Long, SessionToken> sessionTokenMap = new HashMap<Long, SessionToken>();
 	final Map<String, Long> sessionTokenUserMap = new HashMap<String, Long>();
+	final Map<String, Long> sessionTokenAppMap = new HashMap<String, Long>();
 
 	@Override
 	public <T extends AcObject> long create(T acObj) {
@@ -208,6 +210,78 @@ public class AcDaoMemoryImpl implements AcDao {
 	@Override
 	public User readUserBySocialId(long id) {
 		throw new IllegalArgumentException("Method not implemented");
+	}
+
+	@Override
+	public App readApp(long id) {
+		App app = null;
+		Map<Long, App> map = (Map<Long, App>) cache.get(App.class);
+		if (map != null) {
+			app = map.get(id);
+		}
+		return app;
+	}
+
+	@Override
+	public App readApp(String appToken) {
+		Long appId = sessionTokenAppMap.get(appToken);
+		if (appId != null) {
+			App app = readApp(appId);
+			SessionToken token = sessionTokenMap.get(appId); 
+			if (token != null) {
+				app.setExpTime(token.getExpTime());
+				app.setAppToken(appToken);
+			}
+			return app;
+		}
+		
+		App result = null;
+		Map<Long, App> map = (Map<Long, App>) cache.get(App.class);
+		if (map != null) {
+			for (App app : map.values()) {
+				if (appToken.equals(app.getAppToken())) {
+					result = app;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<App> readApps(List<Attribute> attributes) {
+		List<App> list = new ArrayList<App>();
+		Map<Long, App> map = (Map<Long, App>) cache.get(App.class);
+		if (map != null) {
+			for (App app : map.values()) {
+				List<Attribute> appAttrs = app.getAttributes();
+				if (appAttrs.containsAll(attributes)) {
+					list.add(app);
+				}
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public App readAppBySocialId(long id) {
+		throw new IllegalArgumentException("Method not implemented");
+	}
+
+	
+	@Override
+	public String generateAppToken() {
+		return UUID.randomUUID().toString();
+	}
+
+	@Override
+	public String createSessionAppToken(long appId, Long expTime) {
+		String tokenString = null;
+		while (readApp(tokenString = generateAppToken()) != null);
+		SessionToken token = new SessionToken(tokenString, expTime);
+		sessionTokenMap.put(appId, token);
+		sessionTokenUserMap.put(tokenString, appId);
+		return tokenString;
 	}
 
 }

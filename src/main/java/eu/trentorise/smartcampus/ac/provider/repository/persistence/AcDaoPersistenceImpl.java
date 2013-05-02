@@ -34,10 +34,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 import eu.trentorise.smartcampus.ac.provider.repository.AcDao;
+import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AppEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
@@ -501,5 +503,102 @@ public class AcDaoPersistenceImpl implements AcDao {
 			return null;
 		}
 	}
+
+	@Override
+	public App readApp(long id) {
+		try {
+			return PersistenceConverter.toApp((AppEntity) em.find(
+					AppEntity.class, id));
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public App readApp(String appToken) {
+		try {
+			Query query = em
+					.createQuery("from AppEntity u where u.appToken= :appToken or u.sessionAppToken = :appToken");
+			query.setParameter("appToken", appToken);
+			try {
+				AppEntity ue = (AppEntity) query.getSingleResult();
+				App u = PersistenceConverter.toApp(ue);
+				if (appToken != null && appToken.equals(ue.getSessionAppToken())) {
+					u.setAppToken(ue.getSessionAppToken());
+					u.setExpTime(ue.getSessionExpTime());
+				}
+				return u;
+			} catch (NoResultException e) {
+				return null;
+			}
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public List<App> readApps(List<Attribute> attributes) {
+		Query query = em.createQuery("from AppEntity u");
+		List<App> result = PersistenceConverter.toApp(query.getResultList());
+		List<App> filtered = new ArrayList<App>();
+		for (App temp : result) {
+			if (temp.getAttributes().containsAll(attributes)) {
+				filtered.add(temp);
+			}
+		}
+		return filtered;
+	}
+
+	@Override
+	public App readAppBySocialId(long socialId) {
+		try {
+			Query query = em
+					.createQuery("from AppEntity u where u.socialId= :socialId");
+			query.setParameter("socialId", socialId);
+			try {
+				return PersistenceConverter.toApp((AppEntity) query
+						.getSingleResult());
+			} catch (NoResultException e) {
+				return null;
+			}
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public String createSessionAppToken(long appId, Long expTime) {
+		String tokenString = null;
+		while (appExists(tokenString = generateAppToken()));
+		AppEntity ue = (AppEntity) em.find(AppEntity.class, appId);
+		ue.setSessionAppToken(tokenString);
+		ue.setSessionExpTime(expTime);
+		em.merge(ue);
+		return tokenString;
+	}
+
+	
+
+	@Override
+	public String generateAppToken() {
+		return UUID.randomUUID().toString();
+	}
+	
+	private boolean appExists(String appToken) {
+		try {
+			Query query = em
+					.createQuery("from AppEntity u where u.appToken= :appToken or u.sessionAppToken = :appToken");
+			query.setParameter("appToken", appToken);
+			try {
+				query.getSingleResult();
+				return true;
+			} catch (NoResultException e) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 
 }

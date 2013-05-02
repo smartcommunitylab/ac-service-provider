@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
+import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AppEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AttributeEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.AuthorityEntity;
 import eu.trentorise.smartcampus.ac.provider.repository.persistence.datamodel.UserEntity;
@@ -185,5 +187,32 @@ public class PersistenceConverter {
 			return false;
 		}
 		return true;
+	}
+
+	public static App toApp(AppEntity ue) {
+		App u = new App();
+		try {
+			u.setId(ue.getId());
+			u.setAppToken(ue.getAppToken());
+			u.setExpTime(ue.getExpTime());
+			u.setSocialId(ue.getSocialId());
+			u.setAttributes(toAttribute(new ArrayList<AttributeEntity>(ue
+					.getAttributeEntities())));
+		} catch (NullPointerException e) {
+			u = null;
+		}
+		return u;
+	}
+
+	public static List<App> toApp(List<AppEntity> uel) {
+		List<App> list = new ArrayList<App>();
+		try {
+			for (AppEntity temp : uel) {
+				list.add(toApp(temp));
+			}
+		} catch (NullPointerException e) {
+			list = null;
+		}
+		return list;
 	}
 }

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import eu.trentorise.smartcampus.ac.provider.AcProviderService;
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -99,5 +100,8 @@ public class WSAcProviderService implements AcProviderService {
 	}
 	public boolean canReadResource(String authToken, String resourceId) throws AcServiceException {
 		return impl.canReadResource(authToken, resourceId);
+	}
+	public App getAppByToken(String appToken) throws AcServiceException {
+		return impl.getAppByToken(appToken);
 	}
 }

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.trentorise.smartcampus.ac.provider.AcService;
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.User;
 
@@ -163,6 +164,22 @@ public class RESTAcService implements AcService {
 		public boolean canReadResource(String authToken, String resourceId) throws AcServiceException {
 			return true;
 		}
+
+		@Override
+		public App getAppByToken(String appToken) throws AcServiceException {
+			App app = new App();
+			app.setId(1L);
+			app.setSocialId(1L);
+			return app;
+		}
 		
+	}
+
+
+	@GET
+    @Path("/apps/me")
+    @Produces({"application/xml","application/json"})
+	public App getAppByToken(@HeaderParam("APP_TOKEN")String appToken) throws AcServiceException {
+		return impl.getAppByToken(appToken);
 	}
 }

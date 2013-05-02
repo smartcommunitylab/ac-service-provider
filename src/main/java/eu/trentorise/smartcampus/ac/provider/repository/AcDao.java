@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.model.AcObject;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -60,6 +61,20 @@ public interface AcDao {
 	public String createSessionToken(long userId, Long expTime);
 	
 	public String generateAuthToken();
+	
+	//App
+	
+	public App readApp(long id);
+
+	public App readApp(String appToken);
+
+	public List<App> readApps(List<Attribute> attributes);
+
+	public App readAppBySocialId(long id);
+	
+	public String createSessionAppToken(long appId, Long expTime);
+	
+	public String generateAppToken();
 
 
 }

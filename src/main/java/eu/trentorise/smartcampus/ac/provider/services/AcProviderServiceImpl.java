@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import eu.trentorise.smartcampus.ac.provider.AcServiceException;
 import eu.trentorise.smartcampus.ac.provider.managers.SocialEngineManager;
+import eu.trentorise.smartcampus.ac.provider.model.App;
 import eu.trentorise.smartcampus.ac.provider.model.Attribute;
 import eu.trentorise.smartcampus.ac.provider.model.Authority;
 import eu.trentorise.smartcampus.ac.provider.model.User;
@@ -384,6 +385,11 @@ public class AcProviderServiceImpl implements TXAcProviderService {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public App getAppByToken(String appToken) throws AcServiceException {
+		return dao.readApp(appToken);
 	}
 	
 
